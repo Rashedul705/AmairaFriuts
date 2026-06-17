@@ -70,10 +70,49 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Log abandoned cart to backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      
+      const itemsToLog = cartItems.map(item => ({
+        productId: item._id,
+        productTitle: item.title,
+        variant: item.selectedVariant ? item.selectedVariant.label : item.category,
+        quantity: item.quantity,
+        price: item.selectedVariant ? item.selectedVariant.price : item.basePrice
+      }));
+
+      const payload = {
+        ...formData,
+        items: itemsToLog,
+        cartTotal: cartTotal,
+        shippingFee: shippingFee
+      };
+
+      const res = await fetch(`${apiUrl}/api/orders/abandoned-carts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Save the ID so we can recover it on the payment page
+        localStorage.setItem('abandonedCartId', data.abandonedCartId);
+      }
+    } catch (err) {
+      console.error("Failed to log abandoned cart", err);
+    }
+
     // Save to localStorage and move to payment step
     localStorage.setItem('checkoutData', JSON.stringify(formData));
+    setIsSubmitting(false);
     router.push('/payment');
   };
 
@@ -186,8 +225,9 @@ export default function CheckoutPage() {
                 form="checkout-form"
                 className="btn btn-primary" 
                 style={{ width: '100%', marginTop: '1.5rem', padding: '0.85rem' }}
+                disabled={isSubmitting}
               >
-                Continue to Payment
+                {isSubmitting ? 'Loading...' : 'Continue to Payment'}
               </button>
             </div>
           </div>

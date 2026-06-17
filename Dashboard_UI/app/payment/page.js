@@ -15,7 +15,7 @@ export default function PaymentPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Retrieve checkout data from local storage
+    // Retrieve checkout data from local storage ONCE on mount
     const savedData = localStorage.getItem('checkoutData');
     if (!savedData) {
       // If no data, redirect back to checkout
@@ -25,15 +25,17 @@ export default function PaymentPage() {
     
     const parsedData = JSON.parse(savedData);
     setFormData(parsedData);
+  }, [router]);
 
-    // Re-calculate shipping fee based on retrieved district
-    if (cartItems && cartItems.length > 0) {
-      let fee = parsedData.district.toLowerCase() === 'dhaka' ? 80 : 150;
+  useEffect(() => {
+    // Re-calculate shipping fee based on retrieved district whenever cart changes
+    if (formData && cartItems && cartItems.length > 0) {
+      let fee = formData.district.toLowerCase() === 'dhaka' ? 80 : 150;
       const hasFreeDelivery = cartItems.some(item => item.freeDelivery);
       if (hasFreeDelivery) fee = 0;
       setShippingFee(fee);
     }
-  }, [cartItems, router]);
+  }, [cartItems, formData]);
 
   if (!formData || !cartItems || cartItems.length === 0) {
     return (
@@ -66,7 +68,8 @@ export default function PaymentPage() {
         body: JSON.stringify({
           ...formData,
           paymentMethod,
-          items: orderItems
+          items: orderItems,
+          abandonedCartId: localStorage.getItem('abandonedCartId') || undefined
         }),
       });
 
@@ -79,6 +82,7 @@ export default function PaymentPage() {
       // Clean up and redirect on success
       clearCart();
       localStorage.removeItem('checkoutData');
+      localStorage.removeItem('abandonedCartId');
       router.push(`/order-success?orderID=${data.orderID}`);
 
     } catch (err) {

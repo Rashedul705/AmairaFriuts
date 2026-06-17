@@ -64,6 +64,8 @@ export default function UnifiedAdminDashboard() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [abandonedCarts, setAbandonedCarts] = useState([]);
+  const [customerTab, setCustomerTab] = useState('Successful'); // 'Successful' | 'Abandoned'
   const [tickets, setTickets] = useState([]);
 
   // Mock State Lists (kept in local memory for live interactive panel editing)
@@ -230,8 +232,8 @@ export default function UnifiedAdminDashboard() {
         setOrders(await ordRes.json());
       }
 
-      // 3. Fetch Customers
-      const custRes = await fetch(`${apiUrl}/api/admin/customers`, {
+      // 3. Fetch Successful Customers
+      const custRes = await fetch(`${apiUrl}/api/orders/admin/successful-customers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (custRes.status === 401) {
@@ -240,6 +242,14 @@ export default function UnifiedAdminDashboard() {
       }
       if (custRes.ok) {
         setCustomers(await custRes.json());
+      }
+
+      // 3.5 Fetch Abandoned Carts
+      const abandonRes = await fetch(`${apiUrl}/api/orders/admin/abandoned-carts`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (abandonRes.ok) {
+        setAbandonedCarts(await abandonRes.json());
       }
 
       // 4. Fetch Support Tickets
@@ -635,6 +645,9 @@ export default function UnifiedAdminDashboard() {
             <div>
               <span style={{ fontSize: '1.25rem', fontWeight: '800' }}>🍏 Amaira Admin</span>
               <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>Control Console</div>
+              <a href="/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '0.5rem', fontSize: '0.75rem', color: '#60a5fa', textDecoration: 'none', border: '1px solid #60a5fa', padding: '0.15rem 0.4rem', borderRadius: '0.25rem' }}>
+                🛒 View Storefront
+              </a>
             </div>
           )}
           <button 
@@ -1438,7 +1451,7 @@ export default function UnifiedAdminDashboard() {
                                 <button onClick={() => { setSelectedOrder(o); setShowPackingSlip(false); }} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
                                   Invoice 🖨️
                                 </button>
-                                <button onClick={() => { setSelectedOrder(o); setShowPackingSlip(true); }} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
+                        <button onClick={() => { setSelectedOrder(o); setShowPackingSlip(true); }} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}>
                                   Slip
                                 </button>
                               </div>
@@ -1456,69 +1469,105 @@ export default function UnifiedAdminDashboard() {
               {/* =============================================================== */}
               {activeMenu === 'Customers' && (
                 <div>
-                  <h3>👥 Registered Customers Directory</h3>
-                  <div className="admin-table-container" style={{ marginTop: '1.5rem' }}>
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th>UID / Phone</th>
-                          <th>Gender / DOB</th>
-                          <th>Wallet points</th>
-                          <th>Access status</th>
-                          <th>Notes</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {customers.map(cust => (
-                          <tr key={cust._id}>
-                            <td>
-                              <strong>{cust.phone || 'No phone'}</strong>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Firebase UID: {cust.customerUID}</div>
-                            </td>
-                            <td>
-                              <div>Gender: {cust.gender || 'Not specified'}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>DOB: {cust.dob || 'N/A'}</div>
-                            </td>
-                            <td>
-                              <span style={{ fontWeight: 'bold', color: 'var(--primary)' }}>🪙 {cust.loyaltyPoints} Points</span>
-                            </td>
-                            <td>
-                              <span className={`ticket-badge ${cust.isBlocked ? 'open' : 'resolved'}`} style={{ backgroundColor: cust.isBlocked ? '#f8d7da' : undefined, color: cust.isBlocked ? '#721c24' : undefined }}>
-                                {cust.isBlocked ? 'Blocked' : 'Active'}
-                              </span>
-                            </td>
-                            <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '200px' }}>
-                              {cust.notes || <span style={{ fontStyle: 'italic' }}>No notes</span>}
-                            </td>
-                            <td>
-                              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                                <button onClick={() => toggleCustomerBlockStatus(cust._id, cust.isBlocked)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: cust.isBlocked ? 'green' : 'red', borderColor: cust.isBlocked ? 'green' : 'red' }}>
-                                  {cust.isBlocked ? 'Unblock' : 'Block'}
-                                </button>
-                                <button onClick={() => adjustCustomerWallet(cust._id, cust.loyaltyPoints)} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
-                                  Points
-                                </button>
-                                <button onClick={() => { setSelectedCustomerId(cust._id); setSelectedCustomerNotes(cust.notes || ''); }} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
-                                  Note
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
+                    <h3 
+                      onClick={() => setCustomerTab('Successful')}
+                      style={{ cursor: 'pointer', margin: 0, color: customerTab === 'Successful' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: customerTab === 'Successful' ? '3px solid var(--primary)' : 'none', paddingBottom: '0.5rem' }}
+                    >
+                      🌟 Successful Orders
+                    </h3>
+                    <h3 
+                      onClick={() => setCustomerTab('Abandoned')}
+                      style={{ cursor: 'pointer', margin: 0, color: customerTab === 'Abandoned' ? '#ef4444' : 'var(--text-muted)', borderBottom: customerTab === 'Abandoned' ? '3px solid #ef4444' : 'none', paddingBottom: '0.5rem' }}
+                    >
+                      🛒 Abandoned Carts
+                    </h3>
                   </div>
 
-                  {/* Notes update area */}
-                  {selectedCustomerId && (
-                    <div style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '0.75rem', backgroundColor: '#fcfaf1' }}>
-                      <h4>✏️ Edit Internal Customer Notes</h4>
-                      <textarea className="form-input" rows="3" style={{ marginTop: '0.5rem', marginBottom: '1rem' }} value={selectedCustomerNotes} onChange={e => setSelectedCustomerNotes(e.target.value)} placeholder="Write internal user details..." />
-                      <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button onClick={saveCustomerAdminNote} className="btn btn-primary">Save notes</button>
-                        <button onClick={() => setSelectedCustomerId(null)} className="btn btn-outline">Cancel</button>
-                      </div>
+                  {customerTab === 'Successful' && (
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Customer Name</th>
+                            <th>Phone</th>
+                            <th>District</th>
+                            <th>Shipping Address</th>
+                            <th>Total Orders</th>
+                            <th>Lifetime Value</th>
+                            <th>Last Order Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {customers.length === 0 && (
+                            <tr><td colSpan="7" className="text-center">No successful customers found.</td></tr>
+                          )}
+                          {customers.map(cust => (
+                            <tr key={cust._id}>
+                              <td><strong>{cust.customerName}</strong></td>
+                              <td>{cust.phone}</td>
+                              <td>{cust.district}</td>
+                              <td><div style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cust.shippingAddress}</div></td>
+                              <td><span style={{ fontWeight: 'bold' }}>{cust.totalOrders}</span></td>
+                              <td><span style={{ fontWeight: 'bold', color: 'var(--primary)' }}>৳ {cust.totalSpent}</span></td>
+                              <td>{new Date(cust.lastOrderDate).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {customerTab === 'Abandoned' && (
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Customer Info</th>
+                            <th>District / Address</th>
+                            <th>Cart Value</th>
+                            <th>Items Left Behind</th>
+                            <th>Last Attempted At</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {abandonedCarts.length === 0 && (
+                            <tr><td colSpan="6" className="text-center">No abandoned carts right now.</td></tr>
+                          )}
+                          {abandonedCarts.map(cart => (
+                            <tr key={cart._id}>
+                              <td>
+                                <strong>{cart.customerName}</strong>
+                                <div style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 'bold' }}>{cart.phone}</div>
+                              </td>
+                              <td>
+                                <div>{cart.district}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cart.shippingAddress}</div>
+                              </td>
+                              <td>
+                                <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>৳ {cart.cartTotal}</span>
+                                <div style={{ fontSize: '0.7rem' }}>+ ৳ {cart.shippingFee} Shipping</div>
+                              </td>
+                              <td>
+                                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                  {cart.items.map((item, idx) => (
+                                    <li key={idx}>{item.quantity}x {item.productTitle} ({item.variant})</li>
+                                  ))}
+                                </ul>
+                              </td>
+                              <td>
+                                {new Date(cart.lastAttemptedAt).toLocaleString()}
+                              </td>
+                              <td>
+                                <a href={`tel:${cart.phone}`} className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none' }}>
+                                  📞 Call
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>

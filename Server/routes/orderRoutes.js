@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const AbandonedCart = require('../models/AbandonedCart');
 const { protect } = require('../middleware/auth');
 
 // Helper to generate unique human-readable tracking ID
@@ -38,7 +39,8 @@ router.post('/', async (req, res) => {
       shippingAddress, 
       items, 
       paymentMethod,
-      customerUID
+      customerUID,
+      abandonedCartId
     } = req.body;
 
     if (!customerName || !phone || !district || !shippingAddress || !items || !Array.isArray(items) || items.length === 0) {
@@ -58,7 +60,7 @@ router.post('/', async (req, res) => {
 
       // Determine price of the variant
       let itemPrice = product.basePrice;
-      const selectedVariant = product.variants.find(v => v.label === item.variant);
+      const selectedVariant = product.variants?.find(v => v.label === item.variant);
       if (selectedVariant) {
         itemPrice = selectedVariant.price;
       }
@@ -107,6 +109,11 @@ router.post('/', async (req, res) => {
     });
 
     const savedOrder = await order.save();
+    
+    if (abandonedCartId) {
+      await AbandonedCart.findByIdAndUpdate(abandonedCartId, { status: 'Recovered' });
+    }
+
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -184,6 +191,73 @@ router.get('/my-orders', protect, async (req, res) => {
       .populate('items.product', 'title images slug')
       .sort({ createdAt: -1 });
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Log an abandoned cart
+// @route   POST /api/orders/abandoned-carts
+// @access  Public
+router.post('/abandoned-carts', async (req, res) => {
+  try {
+    const { customerName, phone, district, shippingAddress, items, cartTotal, shippingFee } = req.body;
+    
+    let cart = await AbandonedCart.findOne({ phone, status: 'Abandoned' }).sort({ lastAttemptedAt: -1 });
+    
+    if (cart) {
+      cart.customerName = customerName;
+      cart.district = district;
+      cart.shippingAddress = shippingAddress;
+      cart.items = items;
+      cart.cartTotal = cartTotal;
+      cart.shippingFee = shippingFee;
+      cart.lastAttemptedAt = Date.now();
+      await cart.save();
+    } else {
+      cart = await AbandonedCart.create({
+        customerName, phone, district, shippingAddress, items, cartTotal, shippingFee
+      });
+    }
+    
+    res.status(201).json({ abandonedCartId: cart._id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Get all abandoned carts
+// @route   GET /api/orders/admin/abandoned-carts
+// @access  Private (Admin)
+router.get('/admin/abandoned-carts', protect, async (req, res) => {
+  try {
+    const carts = await AbandonedCart.find({ status: 'Abandoned' }).sort({ lastAttemptedAt: -1 });
+    res.json(carts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Get aggregated successful customers from orders
+// @route   GET /api/orders/admin/successful-customers
+// @access  Private (Admin)
+router.get('/admin/successful-customers', protect, async (req, res) => {
+  try {
+    const customers = await Order.aggregate([
+      { $match: { orderStatus: { $nin: ['Cancelled', 'Abandoned'] } } },
+      { $group: {
+          _id: "$phone",
+          customerName: { $last: "$customerName" },
+          phone: { $first: "$phone" },
+          district: { $last: "$district" },
+          shippingAddress: { $last: "$shippingAddress" },
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: "$totalAmount" },
+          lastOrderDate: { $max: "$createdAt" }
+      }},
+      { $sort: { lastOrderDate: -1 } }
+    ]);
+    res.json(customers);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

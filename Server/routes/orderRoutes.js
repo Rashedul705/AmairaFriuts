@@ -36,40 +36,59 @@ router.post('/', async (req, res) => {
       phone, 
       district, 
       shippingAddress, 
-      productId, 
-      variant, 
-      quantity, 
+      items, 
       paymentMethod,
       customerUID
     } = req.body;
 
-    if (!customerName || !phone || !district || !shippingAddress || !productId || !variant || !quantity) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+    if (!customerName || !phone || !district || !shippingAddress || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Please provide all required fields and at least one item' });
     }
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    let itemsTotal = 0;
+    const orderItems = [];
+    let freeDeliveryApplies = false;
 
-    // Determine price of the variant
-    let itemPrice = product.basePrice;
-    const selectedVariant = product.variants.find(v => v.label === variant);
-    if (selectedVariant) {
-      itemPrice = selectedVariant.price;
+    // Process each item
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(404).json({ message: `Product not found: ${item.productId}` });
+      }
+
+      // Determine price of the variant
+      let itemPrice = product.basePrice;
+      const selectedVariant = product.variants.find(v => v.label === item.variant);
+      if (selectedVariant) {
+        itemPrice = selectedVariant.price;
+      }
+
+      if (product.freeDelivery) {
+        freeDeliveryApplies = true;
+      }
+
+      itemsTotal += (itemPrice * item.quantity);
+      
+      orderItems.push({
+        product: product._id,
+        productTitle: product.title,
+        variant: item.variant || 'Default',
+        quantity: item.quantity,
+        price: itemPrice
+      });
     }
 
     // Determine shipping fee based on district
-    // e.g. Dhaka: 80, Others: 150. If product specifies free delivery, it's 0.
+    // e.g. Dhaka: 80, Others: 150. If any product specifies free delivery, it's 0.
     let shippingFee = 150;
-    if (product.freeDelivery) {
+    if (freeDeliveryApplies) {
       shippingFee = 0;
     } else {
       const isDhaka = district.toLowerCase().includes('dhaka');
       shippingFee = isDhaka ? 80 : 150;
     }
 
-    const totalAmount = (itemPrice * quantity) + shippingFee;
+    const totalAmount = itemsTotal + shippingFee;
 
     const orderID = await generateTrackingID();
 
@@ -79,10 +98,7 @@ router.post('/', async (req, res) => {
       phone,
       district,
       shippingAddress,
-      product: productId,
-      productTitle: product.title,
-      variant,
-      quantity,
+      items: orderItems,
       totalAmount,
       shippingFee,
       paymentMethod: paymentMethod || 'COD',
@@ -109,7 +125,7 @@ router.get('/track/:query', async (req, res) => {
         { orderID: { $regex: new RegExp(`^${queryStr}$`, 'i') } },
         { phone: queryStr }
       ]
-    }).populate('product', 'title images slug').sort({ createdAt: -1 });
+    }).populate('items.product', 'title images slug').sort({ createdAt: -1 });
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found matching the tracking details' });
@@ -127,7 +143,7 @@ router.get('/track/:query', async (req, res) => {
 router.get('/', protect, async (req, res) => {
   try {
     const orders = await Order.find({})
-      .populate('product', 'title images slug')
+      .populate('items.product', 'title images slug')
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
@@ -165,7 +181,7 @@ router.patch('/:id/status', protect, async (req, res) => {
 router.get('/my-orders', protect, async (req, res) => {
   try {
     const orders = await Order.find({ customerUID: req.adminId })
-      .populate('product', 'title images slug')
+      .populate('items.product', 'title images slug')
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {

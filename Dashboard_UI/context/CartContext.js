@@ -28,41 +28,85 @@ export function CartProvider({ children }) {
     }
   }, [cartItems, isLoaded]);
 
-  const addToCart = (product) => {
+  const addToCart = (product, selectedVariant = null) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item._id === product._id);
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+      // Determine the variant to add
+      let variantToAdd = selectedVariant;
+      if (!variantToAdd && product.variants && product.variants.length > 0) {
+        variantToAdd = product.variants[0];
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+
+      // We consider an item "same" if both product ID and variant label match
+      const existingItemIndex = prevItems.findIndex(
+        (item) => 
+          item._id === product._id && 
+          (variantToAdd ? item.selectedVariant?.label === variantToAdd.label : true)
+      );
+
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex].quantity += 1;
+        return updatedItems;
+      }
+      
+      return [...prevItems, { 
+        ...product, 
+        quantity: 1, 
+        selectedVariant: variantToAdd,
+        cartItemId: `${product._id}_${variantToAdd ? variantToAdd.label : 'default'}` // Unique ID for cart row
+      }];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item._id !== productId));
+  const removeFromCart = (cartItemId) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.cartItemId !== cartItemId));
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (cartItemId, newQuantity) => {
     if (newQuantity < 1) return;
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item._id === productId ? { ...item, quantity: newQuantity } : item
+        item.cartItemId === cartItemId ? { ...item, quantity: newQuantity } : item
       )
     );
+  };
+
+  const updateVariant = (cartItemId, newVariant) => {
+    setCartItems((prevItems) => {
+      // Find the item being changed
+      const itemToChange = prevItems.find(i => i.cartItemId === cartItemId);
+      if (!itemToChange) return prevItems;
+
+      // Construct what the NEW cartItemId will be
+      const newCartItemId = `${itemToChange._id}_${newVariant.label}`;
+
+      // Check if this new variant already exists as a separate row in the cart
+      const existingRowIndex = prevItems.findIndex(i => i.cartItemId === newCartItemId && i.cartItemId !== cartItemId);
+      
+      if (existingRowIndex > -1) {
+        // Merge them: add the quantity to the existing row and remove the old row
+        const updatedItems = [...prevItems];
+        updatedItems[existingRowIndex].quantity += itemToChange.quantity;
+        return updatedItems.filter(i => i.cartItemId !== cartItemId);
+      } else {
+        // Just update the variant and the cartItemId in place
+        return prevItems.map((item) =>
+          item.cartItemId === cartItemId 
+            ? { ...item, selectedVariant: newVariant, cartItemId: newCartItemId } 
+            : item
+        );
+      }
+    });
   };
 
   const clearCart = () => {
     setCartItems([]);
   };
 
-  const cartTotal = cartItems.reduce(
-    (total, item) => total + item.basePrice * item.quantity,
-    0
-  );
+  const cartTotal = cartItems.reduce((total, item) => {
+    const price = item.selectedVariant ? item.selectedVariant.price : item.basePrice;
+    return total + price * item.quantity;
+  }, 0);
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
@@ -73,6 +117,7 @@ export function CartProvider({ children }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        updateVariant,
         clearCart,
         cartTotal,
         cartCount,

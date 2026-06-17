@@ -5,22 +5,41 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 
+const DISTRICTS_BD = [
+  "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", 
+  "Chandpur", "Chapainawabganj", "Chattogram", "Chuadanga", "Comilla", "Cox's Bazar", 
+  "Dhaka", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", 
+  "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", 
+  "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", 
+  "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", 
+  "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", 
+  "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", 
+  "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", 
+  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", 
+  "Tangail", "Thakurgaon"
+].sort();
+
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartItems, cartTotal, clearCart } = useCart();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const { cartItems, cartTotal } = useCart();
   
   const [formData, setFormData] = useState({
     customerName: '',
     phone: '',
     district: 'Dhaka',
-    shippingAddress: '',
-    paymentMethod: 'COD'
+    shippingAddress: ''
   });
 
   // Calculate Shipping (simplified logic: Dhaka = 80, Outside = 150. Free Delivery if any item has it)
   const [shippingFee, setShippingFee] = useState(80);
+
+  useEffect(() => {
+    // Check local storage for previously entered info
+    const savedData = localStorage.getItem('checkoutData');
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
 
   useEffect(() => {
     if (!cartItems || cartItems.length === 0) return;
@@ -51,62 +70,25 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-      
-      const orderItems = cartItems.map(item => ({
-        productId: item._id,
-        variant: item.category, // Assuming category as variant fallback for now
-        quantity: item.quantity
-      }));
-
-      const res = await fetch(`${apiUrl}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          items: orderItems
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to place order');
-      }
-
-      // Success
-      clearCart();
-      router.push(`/order-success?orderID=${data.orderID}`);
-
-    } catch (err) {
-      setError(err.message);
-      setIsSubmitting(false);
-    }
+    // Save to localStorage and move to payment step
+    localStorage.setItem('checkoutData', JSON.stringify(formData));
+    router.push('/payment');
   };
 
   return (
     <div className="section-padding">
       <div className="container">
-        <h2 style={{ marginBottom: '2rem', borderBottom: '2px solid var(--primary-light)', paddingBottom: '1rem' }}>Secure Checkout</h2>
-        
-        {error && (
-          <div style={{ padding: '1rem', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '0.5rem', marginBottom: '2rem' }}>
-            {error}
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
+          <h2 style={{ margin: 0 }}>Secure Checkout</h2>
+          <span style={{ color: 'var(--text-muted)' }}>&gt; Step 1: Shipping Details</span>
+        </div>
 
         <div className="cart-container">
           {/* Checkout Form */}
           <div className="cart-items-list">
-            <h3 style={{ marginBottom: '1.5rem' }}>Shipping Details</h3>
+            <h3 style={{ marginBottom: '1.5rem' }}>Where should we deliver?</h3>
             <form id="checkout-form" onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
@@ -143,15 +125,11 @@ export default function CheckoutPage() {
                   onChange={handleInputChange}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}
                 >
-                  <option value="Dhaka">Dhaka (৳80)</option>
-                  <option value="Chittagong">Chittagong (৳150)</option>
-                  <option value="Rajshahi">Rajshahi (৳150)</option>
-                  <option value="Sylhet">Sylhet (৳150)</option>
-                  <option value="Khulna">Khulna (৳150)</option>
-                  <option value="Barisal">Barisal (৳150)</option>
-                  <option value="Rangpur">Rangpur (৳150)</option>
-                  <option value="Mymensingh">Mymensingh (৳150)</option>
-                  <option value="Other">Other (৳150)</option>
+                  {DISTRICTS_BD.map(zila => (
+                    <option key={zila} value={zila}>
+                      {zila} (৳{zila.toLowerCase() === 'dhaka' ? '80' : '150'})
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -167,15 +145,6 @@ export default function CheckoutPage() {
                   placeholder="House, Road, Block, Area..."
                 />
               </div>
-
-              <h3 style={{ marginBottom: '1rem', marginTop: '2rem' }}>Payment Method</h3>
-              <div style={{ padding: '1rem', border: '1px solid var(--primary)', borderRadius: '0.5rem', backgroundColor: 'var(--secondary)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
-                  <input type="radio" name="paymentMethod" value="COD" checked readOnly />
-                  Cash on Delivery (COD)
-                </label>
-                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pay safely when your order arrives.</p>
-              </div>
             </form>
           </div>
 
@@ -185,12 +154,16 @@ export default function CheckoutPage() {
               <h3>Order Summary</h3>
               
               <div style={{ marginBottom: '1.5rem' }}>
-                {cartItems.map((item, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                    <span>{item.title} <span style={{ color: 'var(--text-muted)' }}>x{item.quantity}</span></span>
-                    <span>৳ {item.basePrice * item.quantity}</span>
-                  </div>
-                ))}
+                {cartItems.map((item, idx) => {
+                  const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.basePrice;
+                  const itemLabel = item.selectedVariant ? `(${item.selectedVariant.label})` : '';
+                  return (
+                    <div key={item.cartItemId || idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                      <span>{item.title} {itemLabel} <span style={{ color: 'var(--text-muted)' }}>x{item.quantity}</span></span>
+                      <span>৳ {itemPrice * item.quantity}</span>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="summary-row">
@@ -213,9 +186,8 @@ export default function CheckoutPage() {
                 form="checkout-form"
                 className="btn btn-primary" 
                 style={{ width: '100%', marginTop: '1.5rem', padding: '0.85rem' }}
-                disabled={isSubmitting}
               >
-                {isSubmitting ? 'Processing...' : 'Confirm Order'}
+                Continue to Payment
               </button>
             </div>
           </div>

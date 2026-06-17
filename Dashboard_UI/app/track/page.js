@@ -198,17 +198,15 @@ export default function TrackOrder() {
                     {/* Items */}
                     <div>
                       <h4 style={{ marginBottom: '0.75rem' }}>Order Details</h4>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <span>Item:</span>
-                        <strong>{order.productTitle}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <span>Variant:</span>
-                        <strong>{order.variant}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <span>Quantity:</span>
-                        <strong>{order.quantity} Pcs</strong>
+                      <div style={{ marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.5rem' }}>
+                        {order.items?.map((item, idx) => (
+                          <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{item.productTitle} <span style={{ color: 'var(--text-muted)' }}>({item.variant})</span></span>
+                              <strong>{item.quantity} Pcs</strong>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' }}>
                         <span>Shipping Fee:</span>

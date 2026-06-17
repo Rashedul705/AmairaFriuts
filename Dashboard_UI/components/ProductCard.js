@@ -63,9 +63,17 @@ export default function ProductCard({ product }) {
           >
             Add to Cart
           </button>
-          <Link href={`/product/${product.slug}`} className="btn btn-primary" style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              addToCart(product);
+              window.location.href = '/checkout';
+            }} 
+            className="btn btn-primary" 
+            style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}
+          >
             Buy Now
-          </Link>
+          </button>
         </div>
       </div>
     </div>

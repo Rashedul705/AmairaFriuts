@@ -12,7 +12,10 @@ const MOCK_PRODUCTS = [
     description: "Harvested fresh from Rajshahi. Combination of sweet, fiberless Haribhanga and juicy, fragrant Amropali mangoes.",
     basePrice: 750,
     originalPrice: 890,
-    images: ["https://images.unsplash.com/photo-1553279768-865429fa0078?w=500"],
+    images: [
+      "https://images.unsplash.com/photo-1553279768-865429fa0078?w=500",
+      "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"
+    ],
     category: "Combo Package",
     inStock: true,
     freeDelivery: true,
@@ -83,6 +86,7 @@ export default function ProductDetails() {
   // Checkout Form States
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -166,9 +170,10 @@ export default function ProductDetails() {
     router.push('/checkout');
   };
 
-  const imageUrl = product.images && product.images.length > 0 
-    ? product.images[0] 
-    : "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=500";
+  const images = product.images && product.images.length > 0 
+    ? product.images 
+    : ["https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=500"];
+  const currentImageUrl = images[selectedImageIndex] || images[0];
 
   return (
     <section className="section-padding">
@@ -177,12 +182,37 @@ export default function ProductDetails() {
           
           {/* Product description & gallery */}
           <div>
-            <div className="product-img-wrapper" style={{ borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '2rem' }}>
+            <div className="product-img-wrapper" style={{ borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', height: '400px', overflow: 'hidden' }}>
               {product.freeDelivery && (
                 <span className="free-del-badge">Free Delivery</span>
               )}
-              <img src={imageUrl} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={currentImageUrl} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
+
+            {/* Gallery Thumbnails */}
+            {images.length > 1 && (
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                {images.map((img, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => setSelectedImageIndex(idx)}
+                    style={{ 
+                      width: '80px', 
+                      height: '80px', 
+                      borderRadius: '0.5rem', 
+                      overflow: 'hidden', 
+                      cursor: 'pointer',
+                      border: selectedImageIndex === idx ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                      flexShrink: 0,
+                      opacity: selectedImageIndex === idx ? 1 : 0.6,
+                      transition: 'all 0.2s ease-in-out'
+                    }}
+                  >
+                    <img src={img} alt={`Thumbnail ${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
             
             <span className="badge badge-success" style={{ marginBottom: '0.5rem' }}>{product.category}</span>
             <h1 style={{ marginBottom: '1rem' }}>{product.title}</h1>

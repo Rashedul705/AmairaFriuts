@@ -157,7 +157,8 @@ export default function UnifiedAdminDashboard() {
     basePrice: '',
     originalPrice: '',
     category: CATEGORIES[0],
-    images: [],
+    mainImage: '',
+    galleryImages: [],
     variantsList: [],
     freeDelivery: false,
     inStock: true,
@@ -293,7 +294,7 @@ export default function UnifiedAdminDashboard() {
       basePrice: parseFloat(productForm.basePrice),
       originalPrice: productForm.originalPrice ? parseFloat(productForm.originalPrice) : undefined,
       category: productForm.category,
-      images: productForm.images,
+      images: productForm.mainImage ? [productForm.mainImage, ...productForm.galleryImages] : productForm.galleryImages,
       variants: parsedVariants,
       freeDelivery: productForm.freeDelivery,
       inStock: productForm.inStock,
@@ -362,7 +363,8 @@ export default function UnifiedAdminDashboard() {
       basePrice: prod.basePrice.toString(),
       originalPrice: prod.originalPrice ? prod.originalPrice.toString() : '',
       category: prod.category,
-      images: prod.images || [],
+      mainImage: prod.images && prod.images.length > 0 ? prod.images[0] : '',
+      galleryImages: prod.images && prod.images.length > 1 ? prod.images.slice(1) : [],
       variantsList: vList,
       freeDelivery: prod.freeDelivery || false,
       inStock: prod.inStock !== undefined ? prod.inStock : true,
@@ -388,7 +390,8 @@ export default function UnifiedAdminDashboard() {
       basePrice: '',
       originalPrice: '',
       category: CATEGORIES[0],
-      images: [],
+      mainImage: '',
+      galleryImages: [],
       variantsList: [],
       freeDelivery: false,
       inStock: true,
@@ -404,7 +407,7 @@ export default function UnifiedAdminDashboard() {
     });
   };
 
-  const handleProductImageUpload = async (e) => {
+  const handleImageUpload = async (e, isMain) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -449,10 +452,13 @@ export default function UnifiedAdminDashboard() {
     }
 
     if (uploadedUrls.length > 0) {
-      setProductForm(prev => ({
-        ...prev,
-        images: [...prev.images, ...uploadedUrls]
-      }));
+      setProductForm(prev => {
+        if (isMain) {
+          return { ...prev, mainImage: uploadedUrls[0] };
+        } else {
+          return { ...prev, galleryImages: [...prev.galleryImages, ...uploadedUrls] };
+        }
+      });
     } else {
       showModalAlert('Image upload failed. Please try logging out and logging back in, or check the server logs.', 'Upload Failed', 'danger');
     }
@@ -1009,7 +1015,18 @@ export default function UnifiedAdminDashboard() {
                           return (
                             <tr key={prod._id}>
                               <td>
-                                <img src={img} alt="product" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '0.25rem' }} />
+                                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', maxWidth: '100px' }}>
+                                  {prod.images && prod.images.length > 0 ? (
+                                    prod.images.slice(0, 3).map((image, idx) => (
+                                      <img key={idx} src={image} alt={`product-${idx}`} style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '0.25rem' }} />
+                                    ))
+                                  ) : (
+                                    <img src="https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=80" alt="placeholder" style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '0.25rem' }} />
+                                  )}
+                                  {prod.images && prod.images.length > 3 && (
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>+{prod.images.length - 3}</span>
+                                  )}
+                                </div>
                               </td>
                               <td>
                                 <strong style={{ color: 'var(--primary)' }}>{prod.title}</strong>
@@ -1177,16 +1194,31 @@ export default function UnifiedAdminDashboard() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Upload Product Photo</label>
-                      <input type="file" className="form-input" accept="image/*" multiple onChange={handleProductImageUpload} />
-                      
-                      {productForm.images.length > 0 && (
+                      <label className="form-label">Upload Main Product Image</label>
+                      <input type="file" className="form-input" accept="image/*" onChange={(e) => handleImageUpload(e, true)} />
+                      {productForm.mainImage && (
+                        <div style={{ position: 'relative', width: '100px', height: '100px', marginTop: '1rem', borderRadius: '0.25rem', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                          <img src={productForm.mainImage} alt="main preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <button 
+                            type="button" onClick={() => setProductForm(prev => ({ ...prev, mainImage: '' }))}
+                            style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.75rem', width: '20px', height: '20px' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Upload Gallery Images (Optional)</label>
+                      <input type="file" className="form-input" accept="image/*" multiple onChange={(e) => handleImageUpload(e, false)} />
+                      {productForm.galleryImages.length > 0 && (
                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                          {productForm.images.map((img, i) => (
+                          {productForm.galleryImages.map((img, i) => (
                             <div key={i} style={{ position: 'relative', width: '70px', height: '70px', borderRadius: '0.25rem', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
                               <img src={img} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                               <button 
-                                type="button" onClick={() => setProductForm(prev => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }))}
+                                type="button" onClick={() => setProductForm(prev => ({ ...prev, galleryImages: prev.galleryImages.filter((_, idx) => idx !== i) }))}
                                 style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.75rem', width: '20px', height: '20px' }}
                               >
                                 ×

@@ -88,7 +88,7 @@ export default function ProductDetails() {
     async function fetchProduct() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-        const res = await fetch(`${apiUrl}/api/products/${slug}`);
+        const res = await fetch(`${apiUrl}/api/products/${slug}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setProduct(data);
@@ -285,20 +285,28 @@ export default function ProductDetails() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button 
-                  onClick={handleAddToCart}
-                  className="btn btn-outline" 
-                  style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
-                >
-                  Add to Cart
-                </button>
-                <button 
-                  onClick={handleBuyNow}
-                  className="btn btn-primary" 
-                  style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
-                >
-                  Buy Now
-                </button>
+                {!product.inStock ? (
+                  <div style={{ padding: '1rem', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>
+                    Currently Out of Stock
+                  </div>
+                ) : (
+                  <>
+                    <button 
+                      onClick={handleAddToCart}
+                      className="btn btn-outline" 
+                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                    >
+                      Add to Cart
+                    </button>
+                    <button 
+                      onClick={handleBuyNow}
+                      className="btn btn-primary" 
+                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                    >
+                      Buy Now
+                    </button>
+                  </>
+                )}
               </div>
 
             </div>

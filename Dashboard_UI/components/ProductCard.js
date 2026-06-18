@@ -14,6 +14,9 @@ export default function ProductCard({ product }) {
   return (
     <div className="card animate-slide-up">
       <div className="product-img-wrapper">
+        {!product.inStock && (
+          <span className="free-del-badge" style={{ backgroundColor: '#dc3545', right: '10px', left: 'auto' }}>Out of Stock</span>
+        )}
         {product.freeDelivery && (
           <span className="free-del-badge">Free Delivery</span>
         )}
@@ -56,21 +59,25 @@ export default function ProductCard({ product }) {
           <button 
             onClick={(e) => {
               e.preventDefault();
-              addToCart(product);
+              if (product.inStock) addToCart(product);
             }} 
-            className="btn btn-outline" 
-            style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}
+            className={`btn ${product.inStock ? 'btn-outline' : ''}`} 
+            style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed', backgroundColor: product.inStock ? 'transparent' : '#eee', color: product.inStock ? 'var(--primary)' : '#999', border: product.inStock ? '2px solid var(--primary)' : '2px solid #ccc' }}
+            disabled={!product.inStock}
           >
             Add to Cart
           </button>
           <button 
             onClick={(e) => {
               e.preventDefault();
-              addToCart(product);
-              window.location.href = '/checkout';
+              if (product.inStock) {
+                addToCart(product);
+                window.location.href = '/checkout';
+              }
             }} 
             className="btn btn-primary" 
-            style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem' }}
+            style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed' }}
+            disabled={!product.inStock}
           >
             Buy Now
           </button>

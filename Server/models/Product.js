@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, required: true, trim: true }, // e.g., "Mango", "Pickle", "Dates", "Combo"
   variants: [variantSchema],
   inStock: { type: Boolean, default: true },
+  stockQuantity: { type: Number, default: 0 },
   freeDelivery: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });

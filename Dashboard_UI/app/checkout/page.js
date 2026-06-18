@@ -53,6 +53,8 @@ export default function CheckoutPage() {
     setShippingFee(fee);
   }, [formData.district, cartItems]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!cartItems || cartItems.length === 0) {
     return (
       <div className="section-padding text-center">
@@ -69,8 +71,6 @@ export default function CheckoutPage() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

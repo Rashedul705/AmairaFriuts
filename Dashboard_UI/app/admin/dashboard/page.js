@@ -158,9 +158,10 @@ export default function UnifiedAdminDashboard() {
     originalPrice: '',
     category: CATEGORIES[0],
     images: [],
-    variantsText: '',
+    variantsList: [],
     freeDelivery: false,
     inStock: true,
+    stockQuantity: 0,
     sku: '',
     barcode: '',
     weight: '5 Kg',
@@ -215,7 +216,7 @@ export default function UnifiedAdminDashboard() {
     
     try {
       // 1. Fetch Products
-      const prodRes = await fetch(`${apiUrl}/api/products`);
+      const prodRes = await fetch(`${apiUrl}/api/products`, { cache: 'no-store' });
       if (prodRes.ok) {
         setProducts(await prodRes.json());
       }
@@ -281,20 +282,10 @@ export default function UnifiedAdminDashboard() {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
     
-    // Parse variantsText
-    const parsedVariants = [];
-    if (productForm.variantsText.trim()) {
-      productForm.variantsText.split('\n').forEach(line => {
-        const parts = line.split(':');
-        if (parts.length >= 2) {
-          const label = parts[0].trim();
-          const price = parseFloat(parts[1].trim());
-          if (label && !isNaN(price)) {
-            parsedVariants.push({ label, price });
-          }
-        }
-      });
-    }
+    // Process variantsList
+    const parsedVariants = productForm.variantsList
+      .filter(v => v.label.trim() !== '' && !isNaN(parseFloat(v.price)))
+      .map(v => ({ label: v.label.trim(), price: parseFloat(v.price) }));
 
     const payload = {
       title: productForm.title,
@@ -305,7 +296,8 @@ export default function UnifiedAdminDashboard() {
       images: productForm.images,
       variants: parsedVariants,
       freeDelivery: productForm.freeDelivery,
-      inStock: productForm.inStock
+      inStock: productForm.inStock,
+      stockQuantity: Number(productForm.stockQuantity) || 0
     };
 
     try {
@@ -361,8 +353,8 @@ export default function UnifiedAdminDashboard() {
     setIsEditingProduct(true);
     setEditingProductId(prod._id);
     
-    // Parse variants back to text
-    const vText = prod.variants ? prod.variants.map(v => `${v.label}: ${v.price}`).join('\n') : '';
+    // Map variants directly
+    const vList = prod.variants ? prod.variants.map(v => ({ label: v.label, price: v.price.toString() })) : [];
 
     setProductForm({
       title: prod.title,
@@ -371,9 +363,10 @@ export default function UnifiedAdminDashboard() {
       originalPrice: prod.originalPrice ? prod.originalPrice.toString() : '',
       category: prod.category,
       images: prod.images || [],
-      variantsText: vText,
+      variantsList: vList,
       freeDelivery: prod.freeDelivery || false,
       inStock: prod.inStock !== undefined ? prod.inStock : true,
+      stockQuantity: prod.stockQuantity || 0,
       sku: prod.sku || 'AM-' + prod.slug.substring(0, 4).toUpperCase(),
       barcode: prod.barcode || '7404141340',
       weight: '5 Kg',
@@ -396,9 +389,10 @@ export default function UnifiedAdminDashboard() {
       originalPrice: '',
       category: CATEGORIES[0],
       images: [],
-      variantsText: '',
+      variantsList: [],
       freeDelivery: false,
       inStock: true,
+      stockQuantity: 0,
       sku: '',
       barcode: '',
       weight: '5 Kg',
@@ -1102,11 +1096,58 @@ export default function UnifiedAdminDashboard() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Package Variants (One per line as Name:Price)</label>
-                      <textarea 
-                        className="form-input" rows="3" value={productForm.variantsText} onChange={e => setProductForm({ ...productForm, variantsText: e.target.value })}
-                        placeholder="5 Kg Package: 750&#10;10 Kg Package: 1450"
-                      />
+                      <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Package Variants</span>
+                        <button 
+                          type="button" 
+                          onClick={() => setProductForm({ ...productForm, variantsList: [...productForm.variantsList, { label: '', price: '' }] })}
+                          className="btn btn-outline" 
+                          style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                        >
+                          ➕ Add Variant
+                        </button>
+                      </label>
+                      {productForm.variantsList.length === 0 ? (
+                        <div style={{ padding: '1rem', border: '1px dashed var(--border-color)', borderRadius: '0.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                          No variants added. Base price will be used.
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {productForm.variantsList.map((variant, index) => (
+                            <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <input 
+                                type="text" className="form-input" placeholder="e.g. 5 Kg Package" style={{ flex: 2 }}
+                                value={variant.label} 
+                                onChange={(e) => {
+                                  const newList = [...productForm.variantsList];
+                                  newList[index].label = e.target.value;
+                                  setProductForm({ ...productForm, variantsList: newList });
+                                }}
+                              />
+                              <input 
+                                type="number" className="form-input" placeholder="Price (৳)" style={{ flex: 1 }}
+                                value={variant.price} 
+                                onChange={(e) => {
+                                  const newList = [...productForm.variantsList];
+                                  newList[index].price = e.target.value;
+                                  setProductForm({ ...productForm, variantsList: newList });
+                                }}
+                              />
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  const newList = productForm.variantsList.filter((_, i) => i !== index);
+                                  setProductForm({ ...productForm, variantsList: newList });
+                                }}
+                                style={{ background: 'none', border: 'none', color: '#e62c2c', cursor: 'pointer', fontSize: '1.2rem', padding: '0 0.25rem' }}
+                                title="Remove Variant"
+                              >
+                                ✖
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="admin-grid-2">
@@ -1156,7 +1197,7 @@ export default function UnifiedAdminDashboard() {
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '2rem' }}>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <input type="checkbox" checked={productForm.freeDelivery} onChange={e => setProductForm({ ...productForm, freeDelivery: e.target.checked })} />
                         <strong>Free Delivery Option</strong>
@@ -1164,6 +1205,10 @@ export default function UnifiedAdminDashboard() {
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                         <input type="checkbox" checked={productForm.inStock} onChange={e => setProductForm({ ...productForm, inStock: e.target.checked })} />
                         <strong>Listed in Stock</strong>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <strong>Stock Qty:</strong>
+                        <input type="number" className="form-input" style={{ width: '80px', padding: '0.2rem 0.5rem' }} value={productForm.stockQuantity} onChange={e => setProductForm({ ...productForm, stockQuantity: e.target.value })} />
                       </label>
                     </div>
 
@@ -1338,6 +1383,7 @@ export default function UnifiedAdminDashboard() {
                         <tr>
                           <th>Product Title</th>
                           <th>Current Status</th>
+                          <th>Quantity</th>
                           <th>Free Delivery</th>
                           <th>Stock Toggle Action</th>
                         </tr>
@@ -1353,6 +1399,31 @@ export default function UnifiedAdminDashboard() {
                               <span className={`ticket-badge ${prod.inStock ? 'resolved' : 'open'}`} style={{ backgroundColor: prod.inStock ? undefined : '#f8d7da', color: prod.inStock ? undefined : '#721c24' }}>
                                 {prod.inStock ? 'IN STOCK' : 'OUT OF STOCK'}
                               </span>
+                            </td>
+                            <td>
+                              <input 
+                                type="number" 
+                                className="form-input" 
+                                style={{ width: '70px', padding: '0.2rem 0.5rem', fontSize: '0.85rem' }}
+                                defaultValue={prod.stockQuantity || 0}
+                                onBlur={async (e) => {
+                                  const newQty = Number(e.target.value);
+                                  if (newQty === prod.stockQuantity) return;
+                                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+                                  const res = await fetch(`${apiUrl}/api/products/${prod._id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ stockQuantity: newQty, inStock: newQty > 0 })
+                                  });
+                                  if (res.ok) {
+                                    showModalAlert('Stock quantity updated!', 'Success', 'success');
+                                    loadAllAdminData();
+                                  }
+                                }}
+                              />
                             </td>
                             <td>{prod.freeDelivery ? '✅ Yes' : '❌ No'}</td>
                             <td>

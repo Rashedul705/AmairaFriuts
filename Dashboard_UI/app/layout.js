@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import N8nChat from "@/components/N8nChat";
 import { CartProvider } from "@/context/CartContext";
-
+import { GoogleTagManager } from '@next/third-parties/google';
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
@@ -33,6 +33,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${fraunces.variable} ${hindSiliguri.variable}`}>
       <body>
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+        )}
         <CartProvider>
           <Navbar />
           <main style={{ flex: 1 }}>

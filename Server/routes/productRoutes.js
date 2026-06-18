@@ -50,7 +50,7 @@ router.get('/:slug', async (req, res) => {
 // @access  Private (Admin)
 router.post('/', protect, async (req, res) => {
   try {
-    const { title, description, basePrice, originalPrice, images, category, variants, inStock, freeDelivery } = req.body;
+    const { title, description, basePrice, originalPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
     if (!title || !basePrice || !category) {
       return res.status(400).json({ message: 'Please provide title, basePrice, and category' });
@@ -73,6 +73,7 @@ router.post('/', protect, async (req, res) => {
       category,
       variants: variants || [],
       inStock: inStock !== undefined ? inStock : true,
+      stockQuantity: stockQuantity !== undefined ? stockQuantity : 0,
       freeDelivery: freeDelivery !== undefined ? freeDelivery : false,
     });
 
@@ -88,7 +89,7 @@ router.post('/', protect, async (req, res) => {
 // @access  Private (Admin)
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, description, basePrice, originalPrice, images, category, variants, inStock, freeDelivery } = req.body;
+    const { title, description, basePrice, originalPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -113,6 +114,7 @@ router.put('/:id', protect, async (req, res) => {
     product.category = category || product.category;
     product.variants = variants || product.variants;
     product.inStock = inStock !== undefined ? inStock : product.inStock;
+    product.stockQuantity = stockQuantity !== undefined ? stockQuantity : product.stockQuantity;
     product.freeDelivery = freeDelivery !== undefined ? freeDelivery : product.freeDelivery;
 
     const updatedProduct = await product.save();

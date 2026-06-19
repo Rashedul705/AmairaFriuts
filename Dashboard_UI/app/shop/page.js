@@ -3,56 +3,7 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 
-const MOCK_PRODUCTS = [
-  {
-    _id: "mock1",
-    title: "Premium Haribhanga & Amropali Combo (5 Kg)",
-    slug: "haribhanga-amropali-combo-5kg",
-    description: "Harvested fresh from Rajshahi. Combination of sweet, fiberless Haribhanga and juicy, fragrant Amropali mangoes.",
-    basePrice: 750,
-    originalPrice: 890,
-    images: ["https://images.unsplash.com/photo-1553279768-865429fa0078?w=500"],
-    category: "Combo Package",
-    inStock: true,
-    freeDelivery: true
-  },
-  {
-    _id: "mock2",
-    title: "Rajshahi Fazli Mango Premium (10 Kg)",
-    slug: "rajshahi-fazli-10kg",
-    description: "Huge-sized, sweet Fazli mangoes straight from the tree. Safe and naturally ripened.",
-    basePrice: 1250,
-    originalPrice: 1450,
-    images: ["https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"],
-    category: "Mango (আম)",
-    inStock: true,
-    freeDelivery: false
-  },
-  {
-    _id: "mock3",
-    title: "Premium Medjool Dates (1 Kg Box)",
-    slug: "medjool-dates-1kg",
-    description: "Rich, soft, and extra-sweet imported Medjool dates. Great for daily energy.",
-    basePrice: 850,
-    originalPrice: 950,
-    images: ["https://images.unsplash.com/photo-1569870499742-763d0974da37?w=500"],
-    category: "Dates (খেজুর)",
-    inStock: true,
-    freeDelivery: false
-  },
-  {
-    _id: "mock4",
-    title: "Homemade Sweet & Sour Mango Pickle",
-    slug: "mango-pickle-400g",
-    description: "Prepared in mustard oil with aromatic spices. No preservatives added. Net weight: 400g.",
-    basePrice: 280,
-    originalPrice: 320,
-    images: ["https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff?w=500"],
-    category: "Pickle (আচার)",
-    inStock: true,
-    freeDelivery: false
-  }
-];
+
 
 const CATEGORIES = [
   "All Products",
@@ -78,14 +29,10 @@ export default function Shop() {
           const data = await res.json();
           if (data && data.length > 0) {
             setProducts(data);
-          } else {
-            setProducts(MOCK_PRODUCTS);
           }
-        } else {
-          setProducts(MOCK_PRODUCTS);
         }
       } catch (error) {
-        setProducts(MOCK_PRODUCTS);
+        console.error('Failed to fetch products');
       } finally {
         setLoading(false);
       }

@@ -1,56 +1,6 @@
 import HomeProductSection from '@/components/HomeProductSection';
 
-// Fallback high-quality mock products if API is empty/unreachable
-const MOCK_PRODUCTS = [
-  {
-    _id: "mock1",
-    title: "Premium Haribhanga & Amropali Combo (5 Kg)",
-    slug: "haribhanga-amropali-combo-5kg",
-    description: "Harvested fresh from Rajshahi. Combination of sweet, fiberless Haribhanga and juicy, fragrant Amropali mangoes.",
-    basePrice: 750,
-    originalPrice: 890,
-    images: ["https://images.unsplash.com/photo-1553279768-865429fa0078?w=500"],
-    category: "Combo Package",
-    inStock: true,
-    freeDelivery: true
-  },
-  {
-    _id: "mock2",
-    title: "Rajshahi Fazli Mango Premium (10 Kg)",
-    slug: "rajshahi-fazli-10kg",
-    description: "Huge-sized, sweet Fazli mangoes straight from the tree. Safe and naturally ripened.",
-    basePrice: 1250,
-    originalPrice: 1450,
-    images: ["https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"],
-    category: "Mango (আম)",
-    inStock: true,
-    freeDelivery: false
-  },
-  {
-    _id: "mock3",
-    title: "Premium Medjool Dates (1 Kg Box)",
-    slug: "medjool-dates-1kg",
-    description: "Rich, soft, and extra-sweet imported Medjool dates. Great for daily energy.",
-    basePrice: 850,
-    originalPrice: 950,
-    images: ["https://images.unsplash.com/photo-1569870499742-763d0974da37?w=500"],
-    category: "Dates (খেজুর)",
-    inStock: true,
-    freeDelivery: false
-  },
-  {
-    _id: "mock4",
-    title: "Homemade Sweet & Sour Mango Pickle",
-    slug: "mango-pickle-400g",
-    description: "Prepared in mustard oil with aromatic spices. No preservatives added. Net weight: 400g.",
-    basePrice: 280,
-    originalPrice: 320,
-    images: ["https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff?w=500"],
-    category: "Pickle (আচার)",
-    inStock: true,
-    freeDelivery: false
-  }
-];
+
 
 export default async function Home() {
   let products = [];
@@ -62,15 +12,10 @@ export default async function Home() {
       const data = await res.json();
       if (data && data.length > 0) {
         products = data;
-      } else {
-        products = MOCK_PRODUCTS;
       }
-    } else {
-      products = MOCK_PRODUCTS;
     }
   } catch (error) {
-    console.error("Failed fetching products, loading mock data:", error);
-    products = MOCK_PRODUCTS;
+    console.error("Failed fetching products:", error);
   }
 
   return (
@@ -86,11 +31,11 @@ export default async function Home() {
             <p style={{ fontSize: '1.2rem', textShadow: '0 1px 2px rgba(0,0,0,0.3)', marginBottom: '2.5rem' }}>
               A fruit-only agri initiative delivering safer fruits — picked, sorted, and packed straight from our registered gardens to your table.
             </p>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <a href="#shop" className="btn btn-accent" style={{ padding: '0.75rem 1.5rem', fontWeight: 'bold' }}>
+            <div className="hero-buttons">
+              <a href="#shop" className="btn btn-accent" style={{ padding: '0.75rem 1.5rem', fontWeight: 'bold', textAlign: 'center', minWidth: '250px' }}>
                 Try Our Fruits
               </a>
-              <a href="/about" className="btn btn-outline" style={{ borderColor: 'white', color: 'white', padding: '0.75rem 1.5rem' }}>
+              <a href="/about" className="btn btn-outline" style={{ borderColor: 'white', color: 'white', padding: '0.75rem 1.5rem', textAlign: 'center', minWidth: '250px' }}>
                 Our Contracted Gardens
               </a>
             </div>

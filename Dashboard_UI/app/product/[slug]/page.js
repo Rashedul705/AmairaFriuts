@@ -4,76 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 
-const MOCK_PRODUCTS = [
-  {
-    _id: "mock1",
-    title: "Premium Haribhanga & Amropali Combo (5 Kg)",
-    slug: "haribhanga-amropali-combo-5kg",
-    description: "Harvested fresh from Rajshahi. Combination of sweet, fiberless Haribhanga and juicy, fragrant Amropali mangoes.",
-    basePrice: 750,
-    originalPrice: 890,
-    images: [
-      "https://images.unsplash.com/photo-1553279768-865429fa0078?w=500",
-      "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"
-    ],
-    category: "Combo Package",
-    inStock: true,
-    freeDelivery: true,
-    variants: [
-      { label: "5 Kg Package", price: 750 },
-      { label: "10 Kg Package", price: 1450 }
-    ]
-  },
-  {
-    _id: "mock2",
-    title: "Rajshahi Fazli Mango Premium (10 Kg)",
-    slug: "rajshahi-fazli-10kg",
-    description: "Huge-sized, sweet Fazli mangoes straight from the tree. Safe and naturally ripened.",
-    basePrice: 1250,
-    originalPrice: 1450,
-    images: ["https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"],
-    category: "Mango (আম)",
-    inStock: true,
-    freeDelivery: false,
-    variants: [
-      { label: "10 Kg Package", price: 1250 },
-      { label: "20 Kg Package", price: 2400 }
-    ]
-  },
-  {
-    _id: "mock3",
-    title: "Premium Medjool Dates (1 Kg Box)",
-    slug: "medjool-dates-1kg",
-    description: "Rich, soft, and extra-sweet imported Medjool dates. Great for daily energy.",
-    basePrice: 850,
-    originalPrice: 950,
-    images: ["https://images.unsplash.com/photo-1569870499742-763d0974da37?w=500"],
-    category: "Dates (খেজুর)",
-    inStock: true,
-    freeDelivery: false,
-    variants: [
-      { label: "1 Kg Box", price: 850 },
-      { label: "2 Kg Package", price: 1650 }
-    ]
-  },
-  {
-    _id: "mock4",
-    title: "Homemade Sweet & Sour Mango Pickle",
-    slug: "mango-pickle-400g",
-    description: "Prepared in mustard oil with aromatic spices. No preservatives added. Net weight: 400g.",
-    basePrice: 280,
-    originalPrice: 320,
-    images: ["https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff?w=500"],
-    category: "Pickle (আচার)",
-    inStock: true,
-    freeDelivery: false,
-    variants: [
-      { label: "400g Jar", price: 280 },
-      { label: "1 Kg Premium Jar", price: 650 }
-    ]
-  }
-];
-
 export default function ProductDetails() {
   const { slug } = useParams();
   const router = useRouter();
@@ -102,30 +32,10 @@ export default function ProductDetails() {
             setSelectedVariant({ label: "Regular Base Price", price: data.basePrice });
           }
         } else {
-          const mock = MOCK_PRODUCTS.find(p => p.slug === slug);
-          if (mock) {
-            setProduct(mock);
-            if (mock.variants && mock.variants.length > 0) {
-              setSelectedVariant(mock.variants[0]);
-            } else {
-              setSelectedVariant({ label: "Regular Base Price", price: mock.basePrice });
-            }
-          } else {
-            setError('Product not found');
-          }
+          setError('Product not found');
         }
       } catch (err) {
-        const mock = MOCK_PRODUCTS.find(p => p.slug === slug);
-        if (mock) {
-          setProduct(mock);
-          if (mock.variants && mock.variants.length > 0) {
-            setSelectedVariant(mock.variants[0]);
-          } else {
-            setSelectedVariant({ label: "Regular Base Price", price: mock.basePrice });
-          }
-        } else {
-          setError('Failed to load product details');
-        }
+        setError('Failed to load product details');
       } finally {
         setLoading(false);
       }
@@ -180,8 +90,8 @@ export default function ProductDetails() {
       <div className="container">
         <div className="detail-grid animate-slide-up">
           
-          {/* Product description & gallery */}
-          <div>
+          {/* Left Column: Gallery */}
+          <div className="product-gallery" style={{ minWidth: 0 }}>
             <div className="product-img-wrapper" style={{ borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', height: '400px', overflow: 'hidden' }}>
               {product.freeDelivery && (
                 <span className="free-del-badge">Free Delivery</span>
@@ -213,7 +123,10 @@ export default function ProductDetails() {
                 ))}
               </div>
             )}
-            
+          </div>
+
+          {/* Right Column: Info & Checkout */}
+          <div className="product-details" style={{ minWidth: 0 }}>
             <span className="badge badge-success" style={{ marginBottom: '0.5rem' }}>{product.category}</span>
             <h1 style={{ marginBottom: '1rem' }}>{product.title}</h1>
             
@@ -226,26 +139,8 @@ export default function ProductDetails() {
               )}
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Product Description</h3>
-              <p style={{ color: 'var(--text-main)', whiteSpace: 'pre-line', fontSize: '1rem', lineHeight: '1.7' }}>
-                {product.description || "No description provided. Experience fresh harvest delivered under 24 hours."}
-              </p>
-            </div>
-
-            <div style={{ marginTop: '2rem', backgroundColor: '#f1f5f9', padding: '1.5rem', borderRadius: '0.5rem' }}>
-              <h4 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>Delivery Notes:</h4>
-              <ul style={{ fontSize: '0.9rem', color: 'var(--text-main)', paddingLeft: '1.25rem' }}>
-                <li>Orders placed before 4:00 PM are delivered next day.</li>
-                <li>Payment is strictly Cash on Delivery (COD) or mobile banking.</li>
-                <li>Package weight and quality guaranteed.</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Checkout & Action section */}
-          <div>
-            <div className="checkout-card" style={{ position: 'sticky', top: '100px' }}>
+            {/* Checkout Card - Moved immediately below the price for best mobile UX */}
+            <div className="checkout-card" style={{ marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', borderBottom: '2px dashed var(--primary)', paddingBottom: '0.75rem' }}>
                 Purchase Options
               </h2>
@@ -338,8 +233,25 @@ export default function ProductDetails() {
                   </>
                 )}
               </div>
-
             </div>
+
+            {/* Description & Notes */}
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem' }}>Product Description</h3>
+              <p style={{ color: 'var(--text-main)', whiteSpace: 'pre-line', fontSize: '1rem', lineHeight: '1.7' }}>
+                {product.description || "No description provided. Experience fresh harvest delivered under 24 hours."}
+              </p>
+            </div>
+
+            <div style={{ marginTop: '2rem', backgroundColor: '#f1f5f9', padding: '1.5rem', borderRadius: '0.5rem' }}>
+              <h4 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>Delivery Notes:</h4>
+              <ul style={{ fontSize: '0.9rem', color: 'var(--text-main)', paddingLeft: '1.25rem' }}>
+                <li>Orders placed before 4:00 PM are delivered next day.</li>
+                <li>Payment is strictly Cash on Delivery (COD) or mobile banking.</li>
+                <li>Package weight and quality guaranteed.</li>
+              </ul>
+            </div>
+            
           </div>
           
         </div>

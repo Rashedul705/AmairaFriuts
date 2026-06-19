@@ -1,23 +1,19 @@
 const mongoose = require('mongoose');
 
-const variantSchema = new mongoose.Schema({
-  label: { type: String, required: true }, // e.g., "5 Kg Package", "10 Kg Package"
-  price: { type: Number, required: true },
-});
-
 const productSchema = new mongoose.Schema({
-  title: { type: String, required: true, trim: true },
+  name: { type: String, required: true },
   slug: { type: String, required: true, unique: true, index: true },
+  title: { type: String, required: true },
   description: { type: String },
-  basePrice: { type: Number, required: true },
-  originalPrice: { type: Number }, // For strikethrough/discounted price
-  images: [{ type: String }], // Array of imgbb URLs
-  category: { type: String, required: true, trim: true }, // e.g., "Mango", "Pickle", "Dates", "Combo"
-  variants: [variantSchema],
-  inStock: { type: Boolean, default: true },
-  stockQuantity: { type: Number, default: 0 },
-  freeDelivery: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  meta_title: { type: String },
+  price_per_kg: { type: Number, required: true },
+  min_order_kg: { type: Number, default: 1 },
+  stock_kg: { type: Number, default: 0 },
+  images: [{ type: String }],
+  is_available: { type: Boolean, default: true },
+  season_note: { type: String }
+}, {
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 module.exports = mongoose.model('Product', productSchema);

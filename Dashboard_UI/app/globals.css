@@ -39,6 +39,8 @@ html, body {
   color: var(--text-main);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   line-height: 1.6;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 body {
@@ -347,6 +349,26 @@ h3 { font-size: 1.6rem; }
   line-height: 1.6;
 }
 
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 767px) {
+  .hero-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-buttons {
+    align-items: center;
+  }
+}
+
 /* Slider Section */
 .category-container {
   display: flex;
@@ -526,6 +548,13 @@ h3 { font-size: 1.6rem; }
   background-color: #ffffff;
   box-shadow: var(--shadow-lg);
 }
+
+@media (max-width: 767px) {
+  .checkout-card {
+    padding: 1.25rem;
+  }
+}
+
 
 .variant-selector {
   display: flex;

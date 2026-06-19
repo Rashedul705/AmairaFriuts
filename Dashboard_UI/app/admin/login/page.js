@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,7 +16,7 @@ export default function AdminLogin() {
     if (token) {
       router.push('/admin/dashboard');
     }
-  }, []);
+  }, [router]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -26,28 +24,32 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // Sign in via Firebase Auth
-      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      
-      // Fetch user ID Token to secure backend requests
-      const token = await userCredential.user.getIdToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const response = await fetch(`${apiUrl}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password,
+        }),
+      });
 
-      localStorage.setItem('adminToken', token);
-      localStorage.setItem('adminUsername', userCredential.user.email);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid credentials');
+      }
+
+      // Successful login
+      localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('adminUsername', data.username);
       
       router.push('/admin/dashboard');
     } catch (err) {
       console.error(err);
-      // Friendly messages for Firebase codes
-      if (err.code === 'auth/invalid-credential') {
-        setError('Invalid email or password. Please try again.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
-      } else if (err.code === 'auth/network-request-failed') {
-        setError('Network error. Check your internet connection.');
-      } else {
-        setError(err.message || 'An error occurred during authentication.');
-      }
+      setError(err.message || 'An error occurred during authentication.');
     } finally {
       setLoading(false);
     }
@@ -80,13 +82,13 @@ export default function AdminLogin() {
 
           <form onSubmit={handleLoginSubmit}>
             <div className="form-group">
-              <label>Email Address</label>
+              <label>Username</label>
               <input 
-                type="email" 
+                type="text" 
                 className="form-control" 
-                placeholder="Enter email (e.g. admin@amairafruits.com)" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter admin username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required 
               />
             </div>

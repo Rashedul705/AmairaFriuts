@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 
 export default function ProductCard({ product }) {
@@ -20,14 +21,16 @@ export default function ProductCard({ product }) {
         {product.freeDelivery && (
           <span className="free-del-badge">Free Delivery</span>
         )}
-        <Link href={`/product/${product.slug}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-          <img 
+        <Link href={`/product/${product.slug}`} style={{ display: 'block', width: '100%', height: '100%', position: 'relative' }}>
+          <Image 
             src={imageUrl} 
             alt={product.title} 
-            className="product-img" 
-            loading="lazy" 
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            style={{ objectFit: 'cover' }}
           />
         </Link>
+
       </div>
       <div className="product-info">
         <span className="product-category">{product.category}</span>

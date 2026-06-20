@@ -600,14 +600,14 @@ export default function UnifiedAdminDashboard() {
 
   // Dashboard Stats Calculations
   const totalOrdersCount = orders.length;
-  const pendingOrdersCount = orders.filter(o => o.orderStatus === 'Pending').length;
-  const confirmedOrdersCount = orders.filter(o => o.orderStatus === 'Confirmed').length;
-  const shippedOrdersCount = orders.filter(o => o.orderStatus === 'Shipped').length;
-  const deliveredOrdersCount = orders.filter(o => o.orderStatus === 'Delivered').length;
-  const cancelledOrdersCount = orders.filter(o => o.orderStatus === 'Cancelled').length;
+  const pendingOrdersCount = orders.filter(o => o.order_status === 'Pending').length;
+  const confirmedOrdersCount = orders.filter(o => o.order_status === 'Confirmed').length;
+  const shippedOrdersCount = orders.filter(o => o.order_status === 'Shipped').length;
+  const deliveredOrdersCount = orders.filter(o => o.order_status === 'delivered').length;
+  const cancelledOrdersCount = orders.filter(o => o.order_status === 'cancelled').length;
 
   const totalRevenue = orders
-    .filter(o => o.orderStatus === 'Delivered')
+    .filter(o => o.order_status === 'delivered')
     .reduce((acc, curr) => acc + curr.totalAmount, 0);
 
   const lowStockThreshold = 10;
@@ -970,13 +970,13 @@ export default function UnifiedAdminDashboard() {
                         <tbody>
                           {orders.slice(0, 5).map(o => (
                             <tr key={o._id}>
-                              <td><strong>{o.orderID}</strong></td>
-                              <td>{o.customerName} ({o.phone})</td>
+                              <td><strong>{o.order_number}</strong></td>
+                              <td>{o.customer_snapshot?.name} ({o.customer_snapshot?.phone})</td>
                               <td>{o.items?.map(i => `${i.productTitle} (${i.variant})`).join(', ')}</td>
-                              <td>৳{o.totalAmount}</td>
+                              <td>৳{o.total}</td>
                               <td>
-                                <span className={`ticket-badge ${o.orderStatus === 'Delivered' ? 'resolved' : 'open'}`}>
-                                  {o.orderStatus}
+                                <span className={`ticket-badge ${o.order_status === 'delivered' ? 'resolved' : 'open'}`}>
+                                  {o.order_status}
                                 </span>
                               </td>
                             </tr>
@@ -1515,42 +1515,42 @@ export default function UnifiedAdminDashboard() {
                         {orders.map(o => (
                           <tr key={o._id}>
                             <td>
-                              <strong>{o.orderID}</strong>
+                              <strong>{o.order_number}</strong>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                {new Date(o.createdAt).toLocaleDateString()}
+                                {new Date(o.created_at).toLocaleDateString()}
                               </div>
                             </td>
                             <td>
-                              <strong>{o.customerName}</strong>
-                              <div style={{ fontSize: '0.8rem' }}>📞 {o.phone}</div>
-                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>📍 {o.shippingAddress}, {o.district}</div>
+                              <strong>{o.customer_snapshot?.name}</strong>
+                              <div style={{ fontSize: '0.8rem' }}>📞 {o.customer_snapshot?.phone}</div>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>📍 {o.customer_snapshot?.address}, {o.customer_snapshot?.division}</div>
                             </td>
                             <td>
                               {o.items?.map((item, idx) => (
                                 <div key={idx} style={{ marginBottom: '0.25rem' }}>
-                                  {item.productTitle}
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-hover)' }}>Variant: {item.variant} · Qty: {item.quantity}</div>
+                                  {item.product_name}
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-hover)' }}>Variant: {item.variant_name} · Qty: {item.quantity_kg}</div>
                                 </div>
                               ))}
                             </td>
-                            <td><strong>৳{o.totalAmount}</strong></td>
+                            <td><strong>৳{o.total}</strong></td>
                             <td>
-                              <span className={`ticket-badge ${o.orderStatus === 'Delivered' ? 'resolved' : 'open'}`}>
-                                {o.orderStatus}
+                              <span className={`ticket-badge ${o.order_status === 'delivered' ? 'resolved' : 'open'}`}>
+                                {o.order_status}
                               </span>
                             </td>
                             <td>
                               <select 
                                 className="form-input" 
                                 style={{ padding: '0.25rem', fontSize: '0.8rem', width: '120px' }}
-                                value={o.orderStatus}
+                                value={o.order_status}
                                 onChange={(e) => handleOrderStatusUpdate(o._id, e.target.value)}
                               >
-                                <option value="Pending">Pending</option>
-                                <option value="Confirmed">Confirmed</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
                               </select>
                             </td>
                             <td>
@@ -1659,7 +1659,7 @@ export default function UnifiedAdminDashboard() {
                               <td>
                                 <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                   {cart.items.map((item, idx) => (
-                                    <li key={idx}>{item.quantity}x {item.productTitle} ({item.variant})</li>
+                                    <li key={idx}>{item.quantity_kg}x {item.product_name} ({item.variant_name})</li>
                                   ))}
                                 </ul>
                               </td>
@@ -1982,7 +1982,7 @@ export default function UnifiedAdminDashboard() {
                           <td><strong>June 2026 (Current)</strong></td>
                           <td>{orders.length} Orders</td>
                           <td><strong>৳ {totalRevenue}</strong></td>
-                          <td>{orders.length > 0 ? ((orders.filter(o => o.orderStatus === 'Delivered').length / orders.length) * 100).toFixed(0) : 100}%</td>
+                          <td>{orders.length > 0 ? ((orders.filter(o => o.order_status === 'delivered').length / orders.length) * 100).toFixed(0) : 100}%</td>
                         </tr>
                         <tr>
                           <td>May 2026</td>
@@ -2356,14 +2356,14 @@ export default function UnifiedAdminDashboard() {
                   <div className="admin-grid-2" style={{ marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                     <div>
                       <strong>Ship To Customer:</strong>
-                      <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>{selectedOrder.customerName}</p>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>{selectedOrder.shippingAddress}, {selectedOrder.district}</p>
-                      <p style={{ margin: 0 }}>Phone: {selectedOrder.phone}</p>
+                      <p style={{ margin: '0.25rem 0', fontWeight: 'bold' }}>{selectedOrder.customer_snapshot?.name}</p>
+                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>{selectedOrder.customer_snapshot?.address}, {selectedOrder.customer_snapshot?.division}</p>
+                      <p style={{ margin: 0 }}>Phone: {selectedOrder.customer_snapshot?.phone}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <strong>Shipping Metadata:</strong>
-                      <p style={{ margin: '0.25rem 0' }}>Order ID: <strong>{selectedOrder.orderID}</strong></p>
-                      <p style={{ margin: 0 }}>Date Placed: {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+                      <p style={{ margin: '0.25rem 0' }}>Order ID: <strong>{selectedOrder.order_number}</strong></p>
+                      <p style={{ margin: 0 }}>Date Placed: {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
                       <p style={{ margin: 0 }}>Courier Partner: Steadfast</p>
                     </div>
                   </div>
@@ -2379,9 +2379,9 @@ export default function UnifiedAdminDashboard() {
                     <tbody>
                       {selectedOrder.items?.map((item, idx) => (
                         <tr key={idx}>
-                          <td style={{ padding: '0.5rem' }}>{item.productTitle}</td>
-                          <td style={{ padding: '0.5rem' }}>{item.variant}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity}</td>
+                          <td style={{ padding: '0.5rem' }}>{item.product_name}</td>
+                          <td style={{ padding: '0.5rem' }}>{item.variant_name}</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity_kg}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2400,22 +2400,22 @@ export default function UnifiedAdminDashboard() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <h3 style={{ fontSize: '1.1rem', margin: 0 }}>CUSTOMER INVOICE</h3>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Order ID: {selectedOrder.orderID}</p>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Order ID: {selectedOrder.order_number}</p>
                     </div>
                   </div>
 
                   <div className="admin-grid-2" style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>
                     <div>
                       <h4 style={{ fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Billing Address:</h4>
-                      <p style={{ fontWeight: 'bold', fontSize: '0.9rem', margin: '0.25rem 0' }}>{selectedOrder.customerName}</p>
-                      <p style={{ color: 'var(--text-muted)', margin: 0 }}>{selectedOrder.shippingAddress}, {selectedOrder.district}</p>
-                      <p style={{ margin: 0 }}>Phone: {selectedOrder.phone}</p>
+                      <p style={{ fontWeight: 'bold', fontSize: '0.9rem', margin: '0.25rem 0' }}>{selectedOrder.customer_snapshot?.name}</p>
+                      <p style={{ color: 'var(--text-muted)', margin: 0 }}>{selectedOrder.customer_snapshot?.address}, {selectedOrder.customer_snapshot?.division}</p>
+                      <p style={{ margin: 0 }}>Phone: {selectedOrder.customer_snapshot?.phone}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <h4 style={{ fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Payment summary:</h4>
-                      <p style={{ margin: '0.25rem 0' }}>Date Placed: {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
-                      <p style={{ margin: 0 }}>Method: {selectedOrder.paymentMethod || 'COD'}</p>
-                      <p style={{ margin: 0, fontWeight: 'bold' }}>Status: {selectedOrder.orderStatus}</p>
+                      <p style={{ margin: '0.25rem 0' }}>Date Placed: {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                      <p style={{ margin: 0 }}>Method: {selectedOrder.payment_method || 'COD'}</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>Status: {selectedOrder.order_status}</p>
                     </div>
                   </div>
 
@@ -2431,11 +2431,11 @@ export default function UnifiedAdminDashboard() {
                     <tbody>
                       {selectedOrder.items?.map((item, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '0.5rem' }}>{item.productTitle}</td>
-                          <td style={{ padding: '0.5rem' }}>{item.variant}</td>
-                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{item.quantity}</td>
+                          <td style={{ padding: '0.5rem' }}>{item.product_name}</td>
+                          <td style={{ padding: '0.5rem' }}>{item.variant_name}</td>
+                          <td style={{ padding: '0.5rem', textAlign: 'center' }}>{item.quantity_kg}</td>
                           <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                            ৳ {item.price * item.quantity}
+                            ৳ {item.price_per_kg * item.quantity_kg}
                           </td>
                         </tr>
                       ))}
@@ -2445,15 +2445,15 @@ export default function UnifiedAdminDashboard() {
                   <div style={{ width: '50%', marginLeft: '50%', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Subtotal:</span>
-                      <span>৳{selectedOrder.totalAmount - selectedOrder.shippingFee}</span>
+                      <span>৳{selectedOrder.total - selectedOrder.delivery_charge}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Delivery Tariff:</span>
-                      <span>৳{selectedOrder.shippingFee}</span>
+                      <span>৳{selectedOrder.delivery_charge}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid var(--primary)', paddingTop: '0.5rem', fontWeight: 'bold', fontSize: '0.95rem' }}>
                       <span>Grand Total:</span>
-                      <span>৳{selectedOrder.totalAmount}</span>
+                      <span>৳{selectedOrder.total}</span>
                     </div>
                   </div>
                 </div>

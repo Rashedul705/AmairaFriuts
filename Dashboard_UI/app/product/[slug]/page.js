@@ -248,8 +248,10 @@ export default function ProductDetails() {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Description & Notes */}
+          {/* Description & Notes */}
+          <div className="product-description-container" style={{ minWidth: 0 }}>
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
               <h3 style={{ marginBottom: '1rem' }}>Product Description</h3>
               <p style={{ color: 'var(--text-main)', whiteSpace: 'pre-line', fontSize: '1rem', lineHeight: '1.7' }}>
@@ -265,7 +267,6 @@ export default function ProductDetails() {
                 <li>Package weight and quality guaranteed.</li>
               </ul>
             </div>
-            
           </div>
           
         </div>

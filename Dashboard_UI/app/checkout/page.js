@@ -229,6 +229,18 @@ export default function CheckoutPage() {
               >
                 {isSubmitting ? 'Loading...' : 'Continue to Payment'}
               </button>
+
+              <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Need help with your order? <br/>
+                <a 
+                  href="https://wa.me/8801740414134?text=I%20need%20help%20with%20my%20checkout"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#25D366', fontWeight: 'bold', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}
+                >
+                  💬 Chat with us on WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>

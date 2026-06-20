@@ -168,6 +168,18 @@ export default function ProductDetails() {
                 </div>
               )}
 
+              <div style={{ marginBottom: '1.5rem' }}>
+                <a 
+                  href={`https://wa.me/8801740414134?text=I%20want%20to%20place%20a%20custom%20order%20for%20${encodeURIComponent(product.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn" 
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', backgroundColor: '#25D366', color: 'white', textDecoration: 'none', borderRadius: '0.5rem', fontWeight: '600' }}
+                >
+                  💬 Custom Order via WhatsApp
+                </a>
+              </div>
+
               {/* Quantity Selector */}
               <div className="form-group" style={{ marginBottom: '2rem' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', display: 'block', marginBottom: '0.5rem' }}>Quantity:</label>

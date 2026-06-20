@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 
 export default function CartPage() {
@@ -33,12 +34,13 @@ export default function CartPage() {
 
                 return (
                   <div key={item.cartItemId} className="cart-item" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                    <Link href={`/product/${item.slug}`} style={{ flexShrink: 0 }}>
-                      <img 
+                    <Link href={`/product/${item.slug}`} style={{ flexShrink: 0, position: 'relative', width: '120px', height: '120px', borderRadius: '0.5rem', overflow: 'hidden', display: 'block' }}>
+                      <Image 
                         src={item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=500"} 
                         alt={item.title} 
-                        className="cart-item-img"
-                        style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '0.5rem' }}
+                        fill
+                        sizes="120px"
+                        style={{ objectFit: 'cover' }}
                       />
                     </Link>
                     

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -816,7 +818,7 @@ export default function AccountPage() {
                     {profile.wishlist.map(product => (
                       <div key={product._id} style={{ border: '1px solid var(--border-color)', borderRadius: '1rem', overflow: 'hidden', backgroundColor: 'var(--bg-main)' }}>
                         <div style={{ aspectRatio: '1/1', position: 'relative', backgroundColor: 'var(--secondary)' }}>
-                          <img src={product.images[0] || 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=300'} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <Image src={product.images[0] || 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=300'} alt={product.title} fill sizes="(max-width: 768px) 100vw, 220px" style={{ objectFit: 'cover' }} loading="lazy" />
                           <button 
                             onClick={() => toggleWishlist(product._id)} 
                             style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: '#ffffff', border: 'none', width: '2rem', height: '2rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}

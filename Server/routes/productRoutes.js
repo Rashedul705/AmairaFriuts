@@ -3,6 +3,18 @@ const router = express.Router();
 const Product = require('../models/Product');
 const { protect } = require('../middleware/auth');
 
+// Simple in-memory cache
+const cache = {
+  data: {},
+  timestamp: {}
+};
+const CACHE_DURATION = 60 * 1000; // 60 seconds
+
+const clearCache = () => {
+  cache.data = {};
+  cache.timestamp = {};
+};
+
 // Helper to generate slug from title
 const generateSlug = (title) => {
   return title
@@ -18,12 +30,22 @@ const generateSlug = (title) => {
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
+    const cacheKey = `products_${category || 'all'}`;
+    
+    if (cache.data[cacheKey] && (Date.now() - cache.timestamp[cacheKey]) < CACHE_DURATION) {
+      return res.json(cache.data[cacheKey]);
+    }
+
     let query = {};
     if (category && category !== 'All Products') {
       // Direct comparison or regex comparison for flexibility
       query.category = { $regex: new RegExp(`^${category}$`, 'i') };
     }
     const products = await Product.find(query).sort({ createdAt: -1 });
+    
+    cache.data[cacheKey] = products;
+    cache.timestamp[cacheKey] = Date.now();
+    
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -35,10 +57,21 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:slug', async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug });
+    const slug = req.params.slug;
+    const cacheKey = `product_${slug}`;
+    
+    if (cache.data[cacheKey] && (Date.now() - cache.timestamp[cacheKey]) < CACHE_DURATION) {
+      return res.json(cache.data[cacheKey]);
+    }
+
+    const product = await Product.findOne({ slug });
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
+    
+    cache.data[cacheKey] = product;
+    cache.timestamp[cacheKey] = Date.now();
+    
     res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -50,6 +83,7 @@ router.get('/:slug', async (req, res) => {
 // @access  Private (Admin)
 router.post('/', protect, async (req, res) => {
   try {
+    clearCache();
     const { title, description, pricePerKg, daysLeftForPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
     if (!title || !pricePerKg || !category) {
@@ -90,6 +124,7 @@ router.post('/', protect, async (req, res) => {
 // @access  Private (Admin)
 router.put('/:id', protect, async (req, res) => {
   try {
+    clearCache();
     const { title, description, pricePerKg, daysLeftForPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
     const product = await Product.findById(req.params.id);
@@ -131,6 +166,7 @@ router.put('/:id', protect, async (req, res) => {
 // @access  Private (Admin)
 router.delete('/:id', protect, async (req, res) => {
   try {
+    clearCache();
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const compression = require('compression');
 const connectDB = require('./config/db');
 
 // Load environment variables
@@ -19,6 +20,7 @@ connectDB();
 const app = express();
 
 // Middlewares
+app.use(compression());
 app.use(cors({
   origin: '*', // Allow all origins for simplicity in development, customisable later
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

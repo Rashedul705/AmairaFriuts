@@ -1,4 +1,5 @@
 import HomeProductSection from '@/components/HomeProductSection';
+import Image from 'next/image';
 
 
 
@@ -134,10 +135,13 @@ export default async function Home() {
             </div>
             <div style={{ position: 'relative' }}>
               <div style={{ position: 'absolute', inset: '-1.5rem', borderRadius: '2rem', backgroundColor: 'rgba(240, 168, 0, 0.12)', filter: 'blur(40px)', zIndex: '-1' }}></div>
-              <img 
+              <Image 
                 src="/assets/gift-box.jpg" 
                 alt="Premium mango gift box packaging" 
-                style={{ width: '100%', borderRadius: '1.5rem', boxShadow: 'var(--shadow-premium)', objectFit: 'cover' }}
+                width={800}
+                height={600}
+                style={{ width: '100%', height: 'auto', borderRadius: '1.5rem', boxShadow: 'var(--shadow-premium)', objectFit: 'cover' }}
+                loading="lazy"
               />
             </div>
           </div>
@@ -243,24 +247,25 @@ export default async function Home() {
             </p>
             
             <div className="moments-gallery-grid">
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1553279768-865429fa0078?w=300" alt="Customer unboxing moment" />
-              </div>
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300" alt="Customer unboxing moment" />
-              </div>
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1569870499742-763d0974da37?w=300" alt="Customer unboxing moment" />
-              </div>
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff?w=300" alt="Customer unboxing moment" />
-              </div>
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1596003906949-67221c37965c?w=300" alt="Customer unboxing moment" />
-              </div>
-              <div className="moment-gallery-item">
-                <img src="https://images.unsplash.com/photo-1528825871115-3581a5387919?w=300" alt="Customer unboxing moment" />
-              </div>
+              {[
+                "https://images.unsplash.com/photo-1553279768-865429fa0078",
+                "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2",
+                "https://images.unsplash.com/photo-1569870499742-763d0974da37",
+                "https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff",
+                "https://images.unsplash.com/photo-1596003906949-67221c37965c",
+                "https://images.unsplash.com/photo-1528825871115-3581a5387919"
+              ].map((src, idx) => (
+                <div key={idx} className="moment-gallery-item" style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden' }}>
+                  <Image 
+                    src={`${src}?w=300`} 
+                    alt="Customer unboxing moment" 
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 

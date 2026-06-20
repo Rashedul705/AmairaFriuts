@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
       }
 
       // Determine price of the variant
-      let itemPrice = product.basePrice;
+      let itemPrice = product.pricePerKg || product.price_per_kg || product.basePrice || 0;
       const selectedVariant = product.variants?.find(v => v.label === item.variant);
       if (selectedVariant) {
         itemPrice = selectedVariant.price;
@@ -72,11 +72,12 @@ router.post('/', async (req, res) => {
       itemsTotal += (itemPrice * item.quantity);
       
       orderItems.push({
-        product: product._id,
-        productTitle: product.title,
-        variant: item.variant || 'Default',
-        quantity: item.quantity,
-        price: itemPrice
+        product_id: product._id,
+        product_name: product.title,
+        variant_name: item.variant || 'Default',
+        quantity_kg: item.quantity,
+        price_per_kg: itemPrice,
+        subtotal: (itemPrice * item.quantity)
       });
     }
 
@@ -94,18 +95,26 @@ router.post('/', async (req, res) => {
 
     const orderID = await generateTrackingID();
 
+    let mappedPaymentMethod = 'cash_on_delivery';
+    if (paymentMethod === 'bKash') mappedPaymentMethod = 'bkash';
+    if (paymentMethod === 'Nagad') mappedPaymentMethod = 'nagad';
+
     const order = new Order({
-      orderID,
-      customerName,
-      phone,
-      district,
-      shippingAddress,
+      order_number: orderID,
+      customer_id: customerUID || undefined,
+      customer_snapshot: {
+        name: customerName,
+        phone: phone,
+        address: shippingAddress,
+        division: district
+      },
       items: orderItems,
-      totalAmount,
-      shippingFee,
-      paymentMethod: paymentMethod || 'COD',
-      orderStatus: 'Pending',
-      customerUID: customerUID || undefined
+      subtotal: itemsTotal,
+      delivery_charge: shippingFee,
+      total: totalAmount,
+      payment_method: mappedPaymentMethod,
+      payment_status: 'pending',
+      order_status: 'pending'
     });
 
     const savedOrder = await order.save();
@@ -129,10 +138,10 @@ router.get('/track/:query', async (req, res) => {
     // Allow tracking by OrderID (e.g. AM-XXXXX) or exact Phone number
     const orders = await Order.find({
       $or: [
-        { orderID: { $regex: new RegExp(`^${queryStr}$`, 'i') } },
-        { phone: queryStr }
+        { order_number: { $regex: new RegExp(`^${queryStr}$`, 'i') } },
+        { 'customer_snapshot.phone': queryStr }
       ]
-    }).populate('items.product', 'title images slug').sort({ createdAt: -1 });
+    }).populate('items.product_id', 'title images slug').sort({ created_at: -1 });
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found matching the tracking details' });
@@ -150,8 +159,8 @@ router.get('/track/:query', async (req, res) => {
 router.get('/', protect, async (req, res) => {
   try {
     const orders = await Order.find({})
-      .populate('items.product', 'title images slug')
-      .sort({ createdAt: -1 });
+      .populate('items.product_id', 'title images slug')
+      .sort({ created_at: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -165,7 +174,7 @@ router.patch('/:id/status', protect, async (req, res) => {
   try {
     const { status } = req.body;
     
-    if (!status || !['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
+    if (!status || !['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].includes(status.toLowerCase())) {
       return res.status(400).json({ message: 'Invalid order status' });
     }
 
@@ -174,7 +183,7 @@ router.patch('/:id/status', protect, async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    order.orderStatus = status;
+    order.order_status = status.toLowerCase();
     const updatedOrder = await order.save();
     res.json(updatedOrder);
   } catch (error) {
@@ -187,9 +196,9 @@ router.patch('/:id/status', protect, async (req, res) => {
 // @access  Private (Customer)
 router.get('/my-orders', protect, async (req, res) => {
   try {
-    const orders = await Order.find({ customerUID: req.adminId })
-      .populate('items.product', 'title images slug')
-      .sort({ createdAt: -1 });
+    const orders = await Order.find({ customer_id: req.adminId })
+      .populate('items.product_id', 'title images slug')
+      .sort({ created_at: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -244,16 +253,16 @@ router.get('/admin/abandoned-carts', protect, async (req, res) => {
 router.get('/admin/successful-customers', protect, async (req, res) => {
   try {
     const customers = await Order.aggregate([
-      { $match: { orderStatus: { $nin: ['Cancelled', 'Abandoned'] } } },
+      { $match: { order_status: { $nin: ['cancelled', 'abandoned'] } } },
       { $group: {
-          _id: "$phone",
-          customerName: { $last: "$customerName" },
-          phone: { $first: "$phone" },
-          district: { $last: "$district" },
-          shippingAddress: { $last: "$shippingAddress" },
+          _id: "$customer_snapshot.phone",
+          customerName: { $last: "$customer_snapshot.name" },
+          phone: { $first: "$customer_snapshot.phone" },
+          district: { $last: "$customer_snapshot.division" },
+          shippingAddress: { $last: "$customer_snapshot.address" },
           totalOrders: { $sum: 1 },
-          totalSpent: { $sum: "$totalAmount" },
-          lastOrderDate: { $max: "$createdAt" }
+          totalSpent: { $sum: "$total" },
+          lastOrderDate: { $max: "$created_at" }
       }},
       { $sort: { lastOrderDate: -1 } }
     ]);

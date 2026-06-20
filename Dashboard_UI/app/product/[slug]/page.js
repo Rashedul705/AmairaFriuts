@@ -93,8 +93,8 @@ export default function ProductDetails() {
         <div className="detail-grid animate-slide-up">
           
           {/* Left Column: Gallery */}
-          <div className="product-gallery" style={{ minWidth: 0 }}>
-            <div className="product-img-wrapper" style={{ borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', height: '400px', overflow: 'hidden' }}>
+          <div className="product-gallery" style={{ minWidth: 0, width: '100%' }}>
+            <div className="product-img-wrapper" style={{ position: 'relative', borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', aspectRatio: '1 / 1', maxHeight: '450px', width: '100%', overflow: 'hidden' }}>
               {product.freeDelivery && (
                 <span className="free-del-badge">Free Delivery</span>
               )}
@@ -128,9 +128,9 @@ export default function ProductDetails() {
           </div>
 
           {/* Right Column: Info & Checkout */}
-          <div className="product-details" style={{ minWidth: 0 }}>
+          <div className="product-details" style={{ minWidth: 0, width: '100%' }}>
             <span className="badge badge-success" style={{ marginBottom: '0.5rem' }}>{product.category}</span>
-            <h1 style={{ marginBottom: '1rem' }}>{product.title}</h1>
+            <h1 style={{ marginBottom: '1rem', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', lineHeight: '1.2', wordWrap: 'break-word', overflowWrap: 'break-word' }}>{product.title}</h1>
             
             <div className="product-prices" style={{ marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)' }}>৳ {unitPrice}</span>
@@ -239,8 +239,10 @@ export default function ProductDetails() {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Description & Notes */}
+          {/* Description & Notes */}
+          <div className="product-description-container" style={{ minWidth: 0 }}>
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
               <h3 style={{ marginBottom: '1rem' }}>Product Description</h3>
               <p style={{ color: 'var(--text-main)', whiteSpace: 'pre-line', fontSize: '1rem', lineHeight: '1.7' }}>
@@ -256,7 +258,6 @@ export default function ProductDetails() {
                 <li>Package weight and quality guaranteed.</li>
               </ul>
             </div>
-            
           </div>
           
         </div>

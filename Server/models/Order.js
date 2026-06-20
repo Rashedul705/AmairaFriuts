@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const orderItemSchema = new mongoose.Schema({
   product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   product_name: { type: String, required: true },
+  variant_name: { type: String },
   quantity_kg: { type: Number, required: true },
   price_per_kg: { type: Number, required: true },
   subtotal: { type: Number, required: true }
@@ -10,7 +11,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   order_number: { type: String, required: true, unique: true, index: true },
-  customer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true, index: true },
+  customer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', index: true },
   customer_snapshot: {
     name: { type: String, required: true },
     phone: { type: String, required: true },

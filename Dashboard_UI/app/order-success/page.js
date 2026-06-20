@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 
-const STATUS_STEPS = ['Pending', 'Confirmed', 'Shipped', 'Delivered'];
+const STATUS_STEPS = ['pending', 'confirmed', 'shipped', 'delivered'];
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -88,7 +88,7 @@ function OrderSuccessContent() {
               <h3 style={{ textAlign: 'center', marginBottom: '2rem' }}>Live Order Tracking</h3>
               
               {/* Timeline Stepper */}
-              {order.orderStatus !== 'Cancelled' ? (
+              {order.order_status !== 'cancelled' ? (
                 <div style={{ position: 'relative', marginBottom: '2.5rem', padding: '0 1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
                     
@@ -108,7 +108,7 @@ function OrderSuccessContent() {
                       position: 'absolute', 
                       top: '1rem', 
                       left: '5%', 
-                      width: `${getStatusStepIndex(order.orderStatus) * 33.33}%`, 
+                      width: `${getStatusStepIndex(order.order_status) * 33.33}%`, 
                       height: '4px', 
                       backgroundColor: 'var(--primary)', 
                       zIndex: 2, 
@@ -117,7 +117,7 @@ function OrderSuccessContent() {
 
                     {/* Nodes */}
                     {STATUS_STEPS.map((step, idx) => {
-                      const isActive = idx <= getStatusStepIndex(order.orderStatus);
+                      const isActive = idx <= getStatusStepIndex(order.order_status);
                       return (
                         <div key={step} style={{ 
                           zIndex: 3, 
@@ -146,7 +146,8 @@ function OrderSuccessContent() {
                             fontWeight: '600', 
                             marginTop: '0.5rem',
                             color: isActive ? 'var(--primary)' : 'var(--text-muted)',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            textTransform: 'capitalize'
                           }}>
                             {step}
                           </span>

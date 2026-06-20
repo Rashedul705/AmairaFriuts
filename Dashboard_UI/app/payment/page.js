@@ -83,7 +83,7 @@ export default function PaymentPage() {
       clearCart();
       localStorage.removeItem('checkoutData');
       localStorage.removeItem('abandonedCartId');
-      router.push(`/order-success?orderID=${data.orderID}`);
+      router.push(`/order-success?orderID=${data.order_number}`);
 
     } catch (err) {
       setError(err.message);

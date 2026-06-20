@@ -29,7 +29,7 @@ export default function CartPage() {
             {/* Cart Items List */}
             <div className="cart-items-list">
               {cartItems.map((item) => {
-                const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.basePrice;
+                const itemPrice = item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice);
 
                 return (
                   <div key={item.cartItemId} className="cart-item" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>

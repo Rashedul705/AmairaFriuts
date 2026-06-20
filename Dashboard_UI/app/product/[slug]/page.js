@@ -29,7 +29,8 @@ export default function ProductDetails() {
           if (data.variants && data.variants.length > 0) {
             setSelectedVariant(data.variants[0]);
           } else {
-            setSelectedVariant({ label: "Regular Base Price", price: data.basePrice });
+            const fallbackPrice = data.pricePerKg || data.price_per_kg || data.basePrice;
+            setSelectedVariant({ label: "Regular Price per Kg", price: fallbackPrice });
           }
         } else {
           setError('Product not found');
@@ -62,7 +63,8 @@ export default function ProductDetails() {
     );
   }
 
-  const unitPrice = selectedVariant ? selectedVariant.price : product.basePrice;
+  const fallbackPrice = product.pricePerKg || product.price_per_kg || product.basePrice;
+  const unitPrice = selectedVariant ? selectedVariant.price : fallbackPrice;
   const subtotal = unitPrice * quantity;
 
   const handleAddToCart = () => {
@@ -132,11 +134,14 @@ export default function ProductDetails() {
             
             <div className="product-prices" style={{ marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)' }}>৳ {unitPrice}</span>
-              {product.originalPrice && (
-                <span style={{ fontSize: '1.25rem', textDecoration: 'line-through', color: 'var(--text-muted)', marginLeft: '1rem' }}>
-                  ৳ {product.originalPrice}
-                </span>
-              )}
+              {(() => {
+                const displayDays = product.daysLeftForPrice || product.originalPrice;
+                return displayDays ? (
+                  <span style={{ fontSize: '1.2rem', color: '#ff6b6b', fontWeight: '500', marginLeft: '1rem' }}>
+                    Valid for {displayDays} days
+                  </span>
+                ) : null;
+              })()}
             </div>
 
             {/* Checkout Card - Moved immediately below the price for best mobile UX */}

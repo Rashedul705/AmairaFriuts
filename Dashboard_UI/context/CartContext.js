@@ -104,7 +104,7 @@ export function CartProvider({ children }) {
   };
 
   const cartTotal = cartItems.reduce((total, item) => {
-    const price = item.selectedVariant ? item.selectedVariant.price : item.basePrice;
+    const price = item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice);
     return total + price * item.quantity;
   }, 0);
 

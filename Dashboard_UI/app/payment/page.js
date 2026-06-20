@@ -57,7 +57,7 @@ export default function PaymentPage() {
         productTitle: item.title,
         variant: item.selectedVariant ? item.selectedVariant.label : item.category,
         quantity: item.quantity,
-        price: item.selectedVariant ? item.selectedVariant.price : item.basePrice
+        price: item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice)
       }));
 
       const res = await fetch(`${apiUrl}/api/orders`, {
@@ -217,7 +217,7 @@ export default function PaymentPage() {
               
               <div style={{ marginBottom: '1.5rem' }}>
                 {cartItems.map((item, idx) => {
-                  const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.basePrice;
+                  const itemPrice = item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice);
                   const itemLabel = item.selectedVariant ? `(${item.selectedVariant.label})` : '';
                   return (
                     <div key={item.cartItemId || idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>

@@ -12,6 +12,9 @@ export default function ProductCard({ product }) {
     ? product.images[0] 
     : "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=500";
 
+  const displayPrice = product.pricePerKg || product.price_per_kg || product.basePrice;
+  const displayDays = product.daysLeftForPrice || product.originalPrice;
+
   return (
     <div className="card animate-slide-up">
       <div className="product-img-wrapper">
@@ -52,10 +55,12 @@ export default function ProductCard({ product }) {
             {product.description}
           </p>
         )}
-        <div className="product-prices">
-          <span className="price-current">৳ {product.basePrice}</span>
-          {product.originalPrice && (
-            <span className="price-old">৳ {product.originalPrice}</span>
+        <div className="product-prices" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span className="price-current">৳ {displayPrice} / kg</span>
+          {displayDays && (
+            <span style={{ fontSize: '0.8rem', color: '#ff6b6b', marginLeft: '0.5rem', fontWeight: '500' }}>
+              Valid for {displayDays} days
+            </span>
           )}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>

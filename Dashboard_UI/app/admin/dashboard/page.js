@@ -154,8 +154,8 @@ export default function UnifiedAdminDashboard() {
   const [productForm, setProductForm] = useState({
     title: '',
     description: '',
-    basePrice: '',
-    originalPrice: '',
+    pricePerKg: '',
+    daysLeftForPrice: '',
     category: CATEGORIES[0],
     mainImage: '',
     galleryImages: [],
@@ -290,9 +290,13 @@ export default function UnifiedAdminDashboard() {
 
     const payload = {
       title: productForm.title,
+      name: productForm.title,
       description: productForm.description,
-      basePrice: parseFloat(productForm.basePrice),
-      originalPrice: productForm.originalPrice ? parseFloat(productForm.originalPrice) : undefined,
+      pricePerKg: parseFloat(productForm.pricePerKg),
+      price_per_kg: parseFloat(productForm.pricePerKg),
+      basePrice: parseFloat(productForm.pricePerKg),
+      daysLeftForPrice: productForm.daysLeftForPrice ? parseInt(productForm.daysLeftForPrice) : undefined,
+      originalPrice: productForm.daysLeftForPrice ? parseInt(productForm.daysLeftForPrice) : undefined,
       category: productForm.category,
       images: productForm.mainImage ? [productForm.mainImage, ...productForm.galleryImages] : productForm.galleryImages,
       variants: parsedVariants,
@@ -360,8 +364,8 @@ export default function UnifiedAdminDashboard() {
     setProductForm({
       title: prod.title,
       description: prod.description || '',
-      basePrice: prod.basePrice.toString(),
-      originalPrice: prod.originalPrice ? prod.originalPrice.toString() : '',
+      pricePerKg: prod.pricePerKg ? prod.pricePerKg.toString() : (prod.price_per_kg ? prod.price_per_kg.toString() : (prod.basePrice ? prod.basePrice.toString() : '')),
+      daysLeftForPrice: prod.daysLeftForPrice ? prod.daysLeftForPrice.toString() : (prod.originalPrice ? prod.originalPrice.toString() : ''),
       category: prod.category,
       mainImage: prod.images && prod.images.length > 0 ? prod.images[0] : '',
       galleryImages: prod.images && prod.images.length > 1 ? prod.images.slice(1) : [],
@@ -387,8 +391,8 @@ export default function UnifiedAdminDashboard() {
     setProductForm({
       title: '',
       description: '',
-      basePrice: '',
-      originalPrice: '',
+      pricePerKg: '',
+      daysLeftForPrice: '',
       category: CATEGORIES[0],
       mainImage: '',
       galleryImages: [],
@@ -607,7 +611,7 @@ export default function UnifiedAdminDashboard() {
     .reduce((acc, curr) => acc + curr.totalAmount, 0);
 
   const lowStockThreshold = 10;
-  const lowStockCount = products.filter(p => !p.inStock || p.basePrice < 500).length; // Simulated threshold
+  const lowStockCount = products.filter(p => !p.inStock || p.pricePerKg < 500).length; // Simulated threshold
 
   // Top Selling Products mock calculation
   const topSellingProducts = products.slice(0, 3);
@@ -921,7 +925,7 @@ export default function UnifiedAdminDashboard() {
                         <ul style={{ paddingLeft: '1rem', marginTop: '0.75rem', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                           {topSellingProducts.map(p => (
                             <li key={p._id}>
-                              <strong>{p.title}</strong> - ৳{p.basePrice} ({p.category})
+                              <strong>{p.title}</strong> - ৳{p.pricePerKg} ({p.category})
                             </li>
                           ))}
                         </ul>
@@ -1004,8 +1008,8 @@ export default function UnifiedAdminDashboard() {
                           <th>Image</th>
                           <th>Title</th>
                           <th>Category</th>
-                          <th>Base Price</th>
-                          <th>In Stock</th>
+                          <th>Price / Kg</th>
+                          <th>Stock</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -1033,7 +1037,7 @@ export default function UnifiedAdminDashboard() {
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Slug: {prod.slug}</div>
                               </td>
                               <td>{prod.category}</td>
-                              <td><strong>৳ {prod.basePrice}</strong></td>
+                              <td><strong>৳ {prod.pricePerKg}</strong></td>
                               <td>
                                 <span className={`ticket-badge ${prod.inStock ? 'resolved' : 'open'}`} style={{ backgroundColor: prod.inStock ? undefined : '#f8d7da', color: prod.inStock ? undefined : '#721c24' }}>
                                   {prod.inStock ? 'In Stock' : 'Out of Stock'}
@@ -1103,12 +1107,12 @@ export default function UnifiedAdminDashboard() {
 
                     <div className="admin-grid-2">
                       <div className="form-group">
-                        <label className="form-label">Base Price (৳) *</label>
-                        <input type="number" className="form-input" required value={productForm.basePrice} onChange={e => setProductForm({ ...productForm, basePrice: e.target.value })} placeholder="750" />
+                        <label className="form-label">Price per Kg (৳) *</label>
+                        <input type="number" className="form-input" required value={productForm.pricePerKg} onChange={e => setProductForm({ ...productForm, pricePerKg: e.target.value })} placeholder="150" />
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Original Price (৳, Strikethrough)</label>
-                        <input type="number" className="form-input" value={productForm.originalPrice} onChange={e => setProductForm({ ...productForm, originalPrice: e.target.value })} placeholder="890" />
+                        <label className="form-label">Days left for this price</label>
+                        <input type="number" className="form-input" value={productForm.daysLeftForPrice} onChange={e => setProductForm({ ...productForm, daysLeftForPrice: e.target.value })} placeholder="e.g. 5" />
                       </div>
                     </div>
 

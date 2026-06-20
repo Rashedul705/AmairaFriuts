@@ -50,10 +50,10 @@ router.get('/:slug', async (req, res) => {
 // @access  Private (Admin)
 router.post('/', protect, async (req, res) => {
   try {
-    const { title, description, basePrice, originalPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
+    const { title, description, pricePerKg, daysLeftForPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
-    if (!title || !basePrice || !category) {
-      return res.status(400).json({ message: 'Please provide title, basePrice, and category' });
+    if (!title || !pricePerKg || !category) {
+      return res.status(400).json({ message: 'Please provide title, pricePerKg, and category' });
     }
 
     let slug = generateSlug(title);
@@ -67,8 +67,8 @@ router.post('/', protect, async (req, res) => {
       title,
       slug,
       description,
-      basePrice,
-      originalPrice,
+      pricePerKg,
+      daysLeftForPrice,
       images: images || [],
       category,
       variants: variants || [],
@@ -89,7 +89,7 @@ router.post('/', protect, async (req, res) => {
 // @access  Private (Admin)
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, description, basePrice, originalPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
+    const { title, description, pricePerKg, daysLeftForPrice, images, category, variants, inStock, stockQuantity, freeDelivery } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -108,8 +108,8 @@ router.put('/:id', protect, async (req, res) => {
       }
     }
     product.description = description !== undefined ? description : product.description;
-    product.basePrice = basePrice !== undefined ? basePrice : product.basePrice;
-    product.originalPrice = originalPrice !== undefined ? originalPrice : product.originalPrice;
+    product.pricePerKg = pricePerKg !== undefined ? pricePerKg : product.pricePerKg;
+    product.daysLeftForPrice = daysLeftForPrice !== undefined ? daysLeftForPrice : product.daysLeftForPrice;
     product.images = images || product.images;
     product.category = category || product.category;
     product.variants = variants || product.variants;
@@ -155,8 +155,8 @@ router.post('/seed', async (req, res) => {
         title: "Premium Haribhanga & Amropali Combo (5 Kg)",
         slug: "haribhanga-amropali-combo-5kg",
         description: "Harvested fresh from Rajshahi. Combination of sweet, fiberless Haribhanga and juicy, fragrant Amropali mangoes.",
-        basePrice: 750,
-        originalPrice: 890,
+        pricePerKg: 750,
+        daysLeftForPrice: 5,
         images: ["https://images.unsplash.com/photo-1553279768-865429fa0078?w=500"],
         category: "Combo Package",
         inStock: true,
@@ -170,8 +170,8 @@ router.post('/seed', async (req, res) => {
         title: "Rajshahi Fazli Mango Premium (10 Kg)",
         slug: "rajshahi-fazli-10kg",
         description: "Huge-sized, sweet Fazli mangoes straight from the tree. Safe and naturally ripened.",
-        basePrice: 1250,
-        originalPrice: 1450,
+        pricePerKg: 1250,
+        daysLeftForPrice: 2,
         images: ["https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=500"],
         category: "Mango (আম)",
         inStock: true,
@@ -185,8 +185,8 @@ router.post('/seed', async (req, res) => {
         title: "Premium Medjool Dates (1 Kg Box)",
         slug: "medjool-dates-1kg",
         description: "Rich, soft, and extra-sweet imported Medjool dates. Great for daily energy.",
-        basePrice: 850,
-        originalPrice: 950,
+        pricePerKg: 850,
+        daysLeftForPrice: 10,
         images: ["https://images.unsplash.com/photo-1569870499742-763d0974da37?w=500"],
         category: "Dates (খেজুর)",
         inStock: true,
@@ -200,8 +200,8 @@ router.post('/seed', async (req, res) => {
         title: "Homemade Sweet & Sour Mango Pickle",
         slug: "mango-pickle-400g",
         description: "Prepared in mustard oil with aromatic spices. No preservatives added. Net weight: 400g.",
-        basePrice: 280,
-        originalPrice: 320,
+        pricePerKg: 280,
+        daysLeftForPrice: 3,
         images: ["https://images.unsplash.com/photo-1589135233689-d91d9cc7d8ff?w=500"],
         category: "Pickle (আচার)",
         inStock: true,
@@ -215,8 +215,8 @@ router.post('/seed', async (req, res) => {
         title: "Premium Khurma Dates (1 Kg)",
         slug: "khurma-dates-1kg",
         description: "High quality Khurma dates, rich in iron and nutrients. Handpacked under strict hygiene standards.",
-        basePrice: 450,
-        originalPrice: 550,
+        pricePerKg: 450,
+        daysLeftForPrice: 7,
         images: ["https://images.unsplash.com/photo-1569870499742-763d0974da37?w=500"],
         category: "Dates (খেজুর)",
         inStock: true,
@@ -230,8 +230,8 @@ router.post('/seed', async (req, res) => {
         title: "Himsagar Mango Rajshahi (5 Kg)",
         slug: "himsagar-mango-5kg",
         description: "The king of mangoes - Himsagar. Known for its pleasant aroma, sweet taste, and fiberless pulp.",
-        basePrice: 650,
-        originalPrice: 750,
+        pricePerKg: 650,
+        daysLeftForPrice: 15,
         images: ["https://images.unsplash.com/photo-1553279768-865429fa0078?w=500"],
         category: "Mango (আম)",
         inStock: true,

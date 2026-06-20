@@ -827,7 +827,7 @@ export default function AccountPage() {
                         </div>
                         <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                           <h4 style={{ fontSize: '0.95rem', fontWeight: 'bold', height: '2.5rem', overflow: 'hidden' }}>{product.title}</h4>
-                          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--primary)' }}>৳{product.basePrice}</span>
+                          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--primary)' }}>৳{product.pricePerKg || product.price_per_kg || product.basePrice}</span>
                           <Link href={`/product/${product.slug}`} className="btn btn-primary" style={{ padding: '0.4rem', fontSize: '0.8rem', textAlign: 'center', display: 'block', marginTop: '0.5rem' }}>
                             View Product
                           </Link>

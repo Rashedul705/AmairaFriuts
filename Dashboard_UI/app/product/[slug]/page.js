@@ -3,7 +3,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import Image from 'next/image';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -95,18 +94,11 @@ export default function ProductDetails() {
           
           {/* Left Column: Gallery */}
           <div className="product-gallery" style={{ minWidth: 0 }}>
-            <div className="product-img-wrapper" style={{ position: 'relative', borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', height: '400px', overflow: 'hidden' }}>
+            <div className="product-img-wrapper" style={{ borderRadius: '1rem', border: '1px solid var(--border-color)', marginBottom: '1rem', height: '400px', overflow: 'hidden' }}>
               {product.freeDelivery && (
-                <span className="free-del-badge" style={{ zIndex: 10 }}>Free Delivery</span>
+                <span className="free-del-badge">Free Delivery</span>
               )}
-              <Image 
-                src={currentImageUrl} 
-                alt={product.title} 
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                style={{ objectFit: 'cover' }} 
-              />
+              <img src={currentImageUrl} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
             {/* Gallery Thumbnails */}
@@ -117,7 +109,6 @@ export default function ProductDetails() {
                     key={idx} 
                     onClick={() => setSelectedImageIndex(idx)}
                     style={{ 
-                      position: 'relative',
                       width: '80px', 
                       height: '80px', 
                       borderRadius: '0.5rem', 
@@ -129,7 +120,7 @@ export default function ProductDetails() {
                       transition: 'all 0.2s ease-in-out'
                     }}
                   >
-                    <Image src={img} alt={`Thumbnail ${idx+1}`} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                    <img src={img} alt={`Thumbnail ${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ))}
               </div>
@@ -248,10 +239,8 @@ export default function ProductDetails() {
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Description & Notes */}
-          <div className="product-description-container" style={{ minWidth: 0 }}>
+            {/* Description & Notes */}
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
               <h3 style={{ marginBottom: '1rem' }}>Product Description</h3>
               <p style={{ color: 'var(--text-main)', whiteSpace: 'pre-line', fontSize: '1rem', lineHeight: '1.7' }}>
@@ -267,6 +256,7 @@ export default function ProductDetails() {
                 <li>Package weight and quality guaranteed.</li>
               </ul>
             </div>
+            
           </div>
           
         </div>

@@ -64,6 +64,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     const product = new Product({
+      name: title,
       title,
       slug,
       description,
@@ -97,6 +98,7 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    product.name = title || product.name;
     product.title = title || product.title;
     if (title && title !== product.title) {
       let newSlug = generateSlug(title);

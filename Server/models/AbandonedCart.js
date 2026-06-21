@@ -1,33 +1,46 @@
 const mongoose = require('mongoose');
 
 const abandonedCartItemSchema = new mongoose.Schema({
-  product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  product_name: { type: String, required: true },
-  quantity_kg: { type: Number, required: true },
-  price_per_kg: { type: Number, required: true }
+  productId: { type: String },
+  productTitle: { type: String, required: true },
+  product_name: { type: String }, // For backwards compatibility
+  variant: { type: String },
+  variant_name: { type: String }, // For backwards compatibility
+  quantity: { type: Number },
+  quantity_kg: { type: Number }, // For backwards compatibility
+  price: { type: Number }
 }, { _id: false });
 
 const abandonedCartSchema = new mongoose.Schema({
-  session_id: { type: String, required: true, index: true },
-  name: { type: String },
-  phone: { type: String, index: true },
+  customerName: { type: String, required: true },
+  phone: { type: String, required: true, index: true },
+  district: { type: String },
+  shippingAddress: { type: String },
   items: [abandonedCartItemSchema],
-  cart_total: { type: Number, required: true },
-  last_step: { 
-    type: String, 
-    enum: ['cart', 'details', 'payment'],
-    required: true
-  },
-  recovery_attempted: { type: Boolean, default: false },
-  recovery_sent_at: { type: Date },
-  last_seen_at: { type: Date, default: Date.now },
-  converted_to_order: { type: Boolean, default: false },
-  order_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' }
+  cartTotal: { type: Number },
+  cartValue: { type: Number }, // For admin UI mapping
+  shippingFee: { type: Number },
+  deliveryCharge: { type: Number }, // For admin UI mapping
+  status: { type: String, default: 'Abandoned' },
+  lastAttemptedAt: { type: Date, default: Date.now },
+  lastUpdatedAt: { type: Date, default: Date.now } // For admin UI mapping
 }, {
-  timestamps: { createdAt: 'created_at', updatedAt: false }
+  timestamps: true
 });
 
-// Index on created_at
-abandonedCartSchema.index({ created_at: -1 });
+// Pre-save hook to ensure duplicate mappings for Admin UI
+abandonedCartSchema.pre('save', function(next) {
+  this.cartValue = this.cartTotal;
+  this.deliveryCharge = this.shippingFee;
+  this.lastUpdatedAt = this.lastAttemptedAt;
+  if (this.items && this.items.length > 0) {
+    this.items.forEach(item => {
+      item.product_name = item.productTitle;
+      item.variant_name = item.variant;
+      item.quantity_kg = item.quantity;
+    });
+  }
+  next();
+});
 
 module.exports = mongoose.model('AbandonedCart', abandonedCartSchema);

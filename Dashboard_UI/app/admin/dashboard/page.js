@@ -1621,6 +1621,9 @@ export default function UnifiedAdminDashboard() {
                               <td>
                                 <strong>{cart.customerName}</strong>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>📞 {cart.phone}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                                  📍 {cart.shippingAddress}, {cart.district}
+                                </div>
                               </td>
                               <td>
                                 {cart.items?.map((item, idx) => (

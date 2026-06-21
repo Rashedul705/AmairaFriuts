@@ -32,6 +32,20 @@ export default function UnifiedAdminDashboard() {
   const [productsSubExpanded, setProductsSubExpanded] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
+  // Restore Active Menu from Session Storage on load
+  useEffect(() => {
+    const storedMenu = sessionStorage.getItem('adminActiveMenu');
+    const storedSubMenu = sessionStorage.getItem('adminActiveSubMenu');
+    if (storedMenu) setActiveMenu(storedMenu);
+    if (storedSubMenu) setActiveSubMenu(storedSubMenu);
+  }, []);
+
+  // Sync Active Menu to Session Storage on change
+  useEffect(() => {
+    sessionStorage.setItem('adminActiveMenu', activeMenu);
+    sessionStorage.setItem('adminActiveSubMenu', activeSubMenu);
+  }, [activeMenu, activeSubMenu]);
+
   // Auto-close mobile drawer on menu switches
   useEffect(() => {
     setMobileSidebarOpen(false);

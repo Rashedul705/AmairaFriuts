@@ -65,7 +65,8 @@ export default function UnifiedAdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [abandonedCarts, setAbandonedCarts] = useState([]);
-  const [customerTab, setCustomerTab] = useState('Successful'); // 'Successful' | 'Abandoned'
+  const [customerTab, setCustomerTab] = useState('Successful');
+  const [orderTab, setOrderTab] = useState('Successful'); // 'Successful' | 'Abandoned'
   const [tickets, setTickets] = useState([]);
 
   // Mock State Lists (kept in local memory for live interactive panel editing)
@@ -1497,21 +1498,36 @@ export default function UnifiedAdminDashboard() {
               {/* =============================================================== */}
               {activeMenu === 'Orders' && (
                 <div>
-                  <h3>🛒 Customer Order Management</h3>
-                  <div className="admin-table-container" style={{ marginTop: '1.5rem' }}>
-                    <table className="admin-table">
-                      <thead>
-                        <tr>
-                          <th>Order ID</th>
-                          <th>Customer Details</th>
-                          <th>Product</th>
-                          <th>Grand Total</th>
-                          <th>Status</th>
-                          <th>Update Status</th>
-                          <th>Invoice Panel</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
+                    <h3 
+                      onClick={() => setOrderTab('Successful')}
+                      style={{ cursor: 'pointer', margin: 0, color: orderTab === 'Successful' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: orderTab === 'Successful' ? '3px solid var(--primary)' : 'none', paddingBottom: '0.5rem' }}
+                    >
+                      🌟 Successful Orders
+                    </h3>
+                    <h3 
+                      onClick={() => setOrderTab('Abandoned')}
+                      style={{ cursor: 'pointer', margin: 0, color: orderTab === 'Abandoned' ? '#ef4444' : 'var(--text-muted)', borderBottom: orderTab === 'Abandoned' ? '3px solid #ef4444' : 'none', paddingBottom: '0.5rem' }}
+                    >
+                      🛒 Abandoned Orders
+                    </h3>
+                  </div>
+
+                  {orderTab === 'Successful' && (
+                    <div className="admin-table-container" style={{ marginTop: '1.5rem' }}>
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Order ID</th>
+                            <th>Customer Details</th>
+                            <th>Product</th>
+                            <th>Grand Total</th>
+                            <th>Status</th>
+                            <th>Update Status</th>
+                            <th>Invoice Panel</th>
+                          </tr>
+                        </thead>
+                        <tbody>
                         {orders.map(o => (
                           <tr key={o._id}>
                             <td>
@@ -1568,6 +1584,64 @@ export default function UnifiedAdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  )}
+
+                  {orderTab === 'Abandoned' && (
+                    <div className="admin-table-container">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Customer Details</th>
+                            <th>Product Details</th>
+                            <th>Cart Total</th>
+                            <th>Failed Date & Time</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {abandonedCarts.length === 0 && (
+                            <tr><td colSpan="5" className="text-center">No abandoned carts right now.</td></tr>
+                          )}
+                          {abandonedCarts.map(cart => (
+                            <tr key={cart._id}>
+                              <td>
+                                <strong>{cart.customerName}</strong>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>📞 {cart.phone}</div>
+                              </td>
+                              <td>
+                                {cart.items?.map((item, idx) => (
+                                  <div key={idx} style={{ marginBottom: '0.25rem' }}>
+                                    {item.product_name}
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--accent-hover)' }}>Variant: {item.variant_name} · Qty: {item.quantity_kg}</div>
+                                  </div>
+                                ))}
+                              </td>
+                              <td>
+                                <strong>৳{cart.cartValue}</strong>
+                              </td>
+                              <td>
+                                <div style={{ fontSize: '0.85rem' }}>
+                                  {new Date(cart.lastUpdatedAt).toLocaleDateString()}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#ef4444' }}>
+                                  {new Date(cart.lastUpdatedAt).toLocaleTimeString()}
+                                </div>
+                              </td>
+                              <td>
+                                <a 
+                                  href={`https://wa.me/88${cart.phone?.replace(/[^0-9]/g, '')}?text=Hi%20${cart.customerName},%20we%20noticed%20you%20left%20some%20delicious%20fruits%20in%20your%20cart%20at%20Amaira%20Fruits!%20Need%20any%20help%20completing%20your%20order?`}
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', borderColor: '#25D366', color: '#25D366' }}
+                                >
+                                  Follow Up 💬
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               )}
 

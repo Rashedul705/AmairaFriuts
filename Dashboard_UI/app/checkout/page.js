@@ -166,7 +166,7 @@ export default function CheckoutPage() {
                 >
                   {DISTRICTS_BD.map(zila => (
                     <option key={zila} value={zila}>
-                      {zila} (৳{zila.toLowerCase() === 'dhaka' ? '80' : '150'})
+                      {zila}
                     </option>
                   ))}
                 </select>

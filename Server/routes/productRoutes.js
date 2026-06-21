@@ -103,7 +103,8 @@ router.post('/', protect, async (req, res) => {
       slug,
       description,
       pricePerKg,
-      daysLeftForPrice,
+      price_validity_days: daysLeftForPrice,
+      price_updated_at: Date.now(),
       images: images || [],
       category,
       variants: variants || [],
@@ -146,7 +147,10 @@ router.put('/:id', protect, async (req, res) => {
     }
     product.description = description !== undefined ? description : product.description;
     product.pricePerKg = pricePerKg !== undefined ? pricePerKg : product.pricePerKg;
-    product.daysLeftForPrice = daysLeftForPrice !== undefined ? daysLeftForPrice : product.daysLeftForPrice;
+    if (daysLeftForPrice !== undefined && daysLeftForPrice !== product.daysLeftForPrice) {
+      product.price_validity_days = daysLeftForPrice;
+      product.price_updated_at = Date.now();
+    }
     product.images = images || product.images;
     product.category = category || product.category;
     product.variants = variants || product.variants;

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import LiveCountdown from '@/components/LiveCountdown';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -68,7 +69,6 @@ export default function ProductDetails() {
   const subtotal = unitPrice * quantity;
 
   const handleAddToCart = () => {
-    // When adding from the detail page, we push it N times.
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant); 
     }
@@ -134,14 +134,12 @@ export default function ProductDetails() {
             
             <div className="product-prices" style={{ marginBottom: '1.5rem' }}>
               <span style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)' }}>৳ {unitPrice}</span>
-              {(() => {
-                const displayDays = product.daysLeftForPrice || product.originalPrice;
-                return displayDays ? (
-                  <span style={{ fontSize: '1.2rem', color: '#ff6b6b', fontWeight: '500', marginLeft: '1rem' }}>
-                    Valid for {displayDays} days
-                  </span>
-                ) : null;
-              })()}
+              {/* Expiry Date */}
+              {product.price_expiry_date && (
+                <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+                  <LiveCountdown expiryDateString={product.price_expiry_date} />
+                </div>
+              )}
             </div>
 
             {/* Checkout Card - Moved immediately below the price for best mobile UX */}

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
+import LiveCountdown from './LiveCountdown';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -13,7 +14,7 @@ export default function ProductCard({ product }) {
     : "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=500";
 
   const displayPrice = product.pricePerKg || product.price_per_kg || product.basePrice;
-  const displayDays = product.daysLeftForPrice || product.originalPrice;
+  const expiryDate = product.price_expiry_date;
 
   return (
     <div className="card animate-slide-up">
@@ -57,11 +58,7 @@ export default function ProductCard({ product }) {
         )}
         <div className="product-prices" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           <span className="price-current">৳ {displayPrice} / kg</span>
-          {displayDays && (
-            <span style={{ fontSize: '0.8rem', color: '#ff6b6b', marginLeft: '0.5rem', fontWeight: '500' }}>
-              Valid for {displayDays} days
-            </span>
-          )}
+          {expiryDate && <LiveCountdown expiryDateString={expiryDate} />}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 

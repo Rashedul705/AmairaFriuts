@@ -15,9 +15,32 @@ const productSchema = new mongoose.Schema({
   category: { type: String },
   variants: { type: Array },
   freeDelivery: { type: Boolean },
-  inStock: { type: Boolean }
+  inStock: { type: Boolean },
+  price_validity_days: { type: Number },
+  price_updated_at: { type: Date, default: Date.now }
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
+
+productSchema.virtual('daysLeftForPrice').get(function() {
+  if (this.price_validity_days == null) return null;
+  const start = this.price_updated_at ? this.price_updated_at.getTime() : this.created_at.getTime();
+  const msPassed = Date.now() - start;
+  const daysPassed = Math.floor(msPassed / (1000 * 60 * 60 * 24));
+  const left = this.price_validity_days - daysPassed;
+  return left > 0 ? left : 0;
+});
+
+productSchema.virtual('price_expiry_date').get(function() {
+  if (this.price_validity_days == null) return null;
+  const start = this.price_updated_at ? this.price_updated_at.getTime() : this.created_at.getTime();
+  const expiry = start + (this.price_validity_days * 24 * 60 * 60 * 1000);
+  return new Date(expiry);
+});
+
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('Product', productSchema);
+

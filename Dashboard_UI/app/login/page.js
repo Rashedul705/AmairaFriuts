@@ -81,7 +81,7 @@ export default function CustomerLogin() {
       <div className="container" style={{ maxWidth: '450px' }}>
         <div className="card animate-slide-up" style={{ padding: '2.5rem', boxShadow: 'var(--shadow-lg)' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{ fontSize: '3rem' }}>🍏</span>
+            <img src="/logo.png" alt="Amaira Fruits" style={{ height: '60px', width: 'auto', margin: '0 auto' }} />
             <h2 style={{ marginTop: '0.5rem', color: 'var(--primary)' }}>Customer Login</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Welcome back to Amaira Fruits</p>
           </div>

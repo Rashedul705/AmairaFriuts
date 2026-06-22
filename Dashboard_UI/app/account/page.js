@@ -1389,7 +1389,9 @@ export default function AccountPage() {
             <div className="invoice-print-area" style={{ padding: '0.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--primary)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
                 <div>
-                  <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', fontWeight: '800', margin: 0 }}>🍏 Amaira Fruits</h2>
+                  <div style={{ marginBottom: '0.2rem' }}>
+                    <img src="/logo.png" alt="Amaira Fruits" style={{ height: '40px', width: 'auto' }} />
+                  </div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Premium safe chemical-free fruits chain</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>

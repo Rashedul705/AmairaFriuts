@@ -15,7 +15,9 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <h3 style={{ color: '#ffffff', marginBottom: '1rem' }}>🍏 Amaira Fruits</h3>
+            <div style={{ marginBottom: '1rem' }}>
+              <img src="/logo.png" alt="Amaira Fruits" style={{ height: '40px', width: 'auto' }} />
+            </div>
             <p style={{ fontSize: '0.9rem', lineHeight: '1.6', maxWidth: '350px' }}>
               Amaira Fruits (AF) is an Agritech Premium Fruit chain bringing fresh, safe, and handpicked quality fruits from the best orchards directly to your doorstep.
             </p>

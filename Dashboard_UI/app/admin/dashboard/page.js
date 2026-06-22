@@ -662,7 +662,10 @@ export default function UnifiedAdminDashboard() {
         }}>
           {sidebarExpanded && (
             <div>
-              <span style={{ fontSize: '1.25rem', fontWeight: '800' }}>🍏 Amaira Admin</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img src="/logo.png" alt="Amaira Fruits" style={{ height: '30px', width: 'auto' }} />
+                <span style={{ fontSize: '1.25rem', fontWeight: '800' }}>Admin</span>
+              </div>
               <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>Control Console</div>
               <a href="/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '0.5rem', fontSize: '0.75rem', color: '#60a5fa', textDecoration: 'none', border: '1px solid #60a5fa', padding: '0.15rem 0.4rem', borderRadius: '0.25rem' }}>
                 🛒 View Storefront
@@ -812,9 +815,8 @@ export default function UnifiedAdminDashboard() {
         
         {/* Sticky Mobile Header */}
         <header className="admin-mobile-header">
-          <Link href="/" className="logo-link" style={{ fontSize: '1.25rem' }}>
-            <span className="logo-icon">🍏</span>
-            <span>Amaira Fruits</span>
+          <Link href="/" className="logo-link" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/logo.png" alt="Amaira Fruits" style={{ height: '36px', width: 'auto' }} />
           </Link>
           <button 
             className="admin-mobile-menu-btn" 
@@ -2486,7 +2488,9 @@ export default function UnifiedAdminDashboard() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--primary)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
                     <div>
-                      <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', fontWeight: '800', margin: 0 }}>🍏 Amaira Fruits</h2>
+                      <div style={{ marginBottom: '0.2rem' }}>
+                        <img src="/logo.png" alt="Amaira Fruits" style={{ height: '40px', width: 'auto' }} />
+                      </div>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Fresh, chemical-free organic fruits chain</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>

@@ -50,9 +50,8 @@ export default function Navbar() {
       <header className="header">
         <div className="container">
           <div className="nav-wrapper">
-            <Link href="/" className="logo-link">
-              <span className="logo-icon">🍏</span>
-              <span>Amaira Fruits</span>
+            <Link href="/" className="logo-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <img src="/logo.png" alt="Amaira Fruits" style={{ height: '40px', width: 'auto' }} />
             </Link>
             
             {/* Desktop Navigation */}
@@ -160,7 +159,7 @@ export default function Navbar() {
       <div className={`drawer-backdrop ${mobileMenuOpen ? 'open' : ''}`} onClick={toggleMobileMenu}></div>
       <div className={`mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <span style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--primary)' }}>🍏 Amaira Fruits</span>
+          <img src="/logo.png" alt="Amaira Fruits" style={{ height: '36px', width: 'auto' }} />
         </div>
         <ul className="drawer-links">
           <li>

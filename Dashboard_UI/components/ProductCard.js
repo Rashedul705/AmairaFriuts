@@ -64,8 +64,27 @@ export default function ProductCard({ product }) {
           <button 
             onClick={(e) => {
               e.preventDefault();
-              if (product.inStock) addToCart(product);
-            }} 
+              if (product.inStock) {
+                addToCart(product);
+                
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: null });
+                window.dataLayer.push({
+                  event: 'add_to_cart',
+                  ecommerce: {
+                    currency: 'BDT',
+                    value: displayPrice,
+                    items: [{
+                      item_id: product._id || product.slug,
+                      item_name: product.title,
+                      item_category: product.category,
+                      price: displayPrice,
+                      quantity: 1
+                    }]
+                  }
+                });
+              }
+            }}
             className={`btn ${product.inStock ? 'btn-outline' : ''}`} 
             style={{ flex: 1, padding: '0.6rem 0.5rem', fontSize: '0.9rem', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed', backgroundColor: product.inStock ? 'transparent' : '#eee', color: product.inStock ? 'var(--primary)' : '#999', border: product.inStock ? '2px solid var(--primary)' : '2px solid #ccc' }}
             disabled={!product.inStock}
@@ -77,6 +96,24 @@ export default function ProductCard({ product }) {
               e.preventDefault();
               if (product.inStock) {
                 addToCart(product);
+
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: null });
+                window.dataLayer.push({
+                  event: 'add_to_cart',
+                  ecommerce: {
+                    currency: 'BDT',
+                    value: displayPrice,
+                    items: [{
+                      item_id: product._id || product.slug,
+                      item_name: product.title,
+                      item_category: product.category,
+                      price: displayPrice,
+                      quantity: 1
+                    }]
+                  }
+                });
+
                 window.location.href = '/checkout';
               }
             }} 

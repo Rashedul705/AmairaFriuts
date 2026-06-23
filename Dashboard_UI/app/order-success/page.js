@@ -26,7 +26,32 @@ function OrderSuccessContent() {
         const data = await res.json();
         
         if (res.ok && data.length > 0) {
-          setOrder(data[0]); // Tracking returns an array
+          const orderData = data[0];
+          setOrder(orderData); // Tracking returns an array
+
+          const transactionId = orderData.order_number || orderID;
+          const storageKey = 'gtm_purchased_' + transactionId;
+          
+          if (!sessionStorage.getItem(storageKey)) {
+            sessionStorage.setItem(storageKey, '1');
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+              event: 'purchase',
+              ecommerce: {
+                transaction_id: transactionId,
+                currency: 'BDT',
+                value: orderData.total,
+                items: (orderData.items || []).map(item => ({
+                  item_id: item.product_id || item._id,
+                  item_name: item.product_name || item.name,
+                  item_category: item.variant_name || 'Uncategorized',
+                  price: item.price_per_kg || item.price,
+                  quantity: item.quantity_kg || item.quantity
+                }))
+              }
+            });
+          }
         }
       } catch (err) {
         console.error("Failed to fetch order details", err);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import LiveCountdown from '@/components/LiveCountdown';
 
@@ -10,6 +10,8 @@ export default function ProductDetails() {
   const router = useRouter();
   const { addToCart } = useCart();
   
+  const viewItemFired = useRef(false);
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -32,6 +34,28 @@ export default function ProductDetails() {
           } else {
             const fallbackPrice = data.pricePerKg || data.price_per_kg || data.basePrice;
             setSelectedVariant({ label: "Regular Price per Kg", price: fallbackPrice });
+          }
+
+          const itemPrice = data.variants && data.variants.length > 0 ? data.variants[0].price : (data.pricePerKg || data.price_per_kg || data.basePrice);
+          
+          if (!viewItemFired.current) {
+            viewItemFired.current = true;
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+              event: 'view_item',
+              ecommerce: {
+                currency: 'BDT',
+                value: itemPrice,
+                items: [{
+                  item_id: data._id,
+                  item_name: data.title,
+                  item_category: data.category,
+                  price: itemPrice,
+                  quantity: 1
+                }]
+              }
+            });
           }
         } else {
           setError('Product not found');
@@ -72,6 +96,24 @@ export default function ProductDetails() {
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant); 
     }
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: 'add_to_cart',
+      ecommerce: {
+        currency: 'BDT',
+        value: unitPrice * quantity,
+        items: [{
+          item_id: product._id,
+          item_name: product.title,
+          item_category: product.category,
+          price: unitPrice,
+          quantity: quantity
+        }]
+      }
+    });
+
     alert(`${quantity}x ${product.title} added to cart!`);
   };
 
@@ -79,6 +121,24 @@ export default function ProductDetails() {
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant);
     }
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: 'add_to_cart',
+      ecommerce: {
+        currency: 'BDT',
+        value: unitPrice * quantity,
+        items: [{
+          item_id: product._id,
+          item_name: product.title,
+          item_category: product.category,
+          price: unitPrice,
+          quantity: quantity
+        }]
+      }
+    });
+
     router.push('/checkout');
   };
 

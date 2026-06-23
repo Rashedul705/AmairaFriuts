@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import N8nChat from "@/components/N8nChat";
 import { CartProvider } from "@/context/CartContext";
 import { GoogleTagManager } from '@next/third-parties/google';
+import GTMDebugPanel from "@/components/GTMDebugPanel";
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default function RootLayout({ children }) {
           >
             💬
           </a>
+          <GTMDebugPanel />
         </CartProvider>
       </body>
     </html>

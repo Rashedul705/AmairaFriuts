@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
 
   // Calculate Shipping (simplified logic: Dhaka = 80, Outside = 150. Free Delivery if any item has it)
   const [shippingFee, setShippingFee] = useState(80);
+  const hasTrackedCheckout = useRef(false);
 
   useEffect(() => {
     // Check local storage for previously entered info
@@ -52,6 +53,30 @@ export default function CheckoutPage() {
     
     setShippingFee(fee);
   }, [formData.district, cartItems]);
+
+  useEffect(() => {
+    if (cartItems && cartItems.length > 0 && cartTotal > 0) {
+      if (hasTrackedCheckout.current) return;
+      hasTrackedCheckout.current = true;
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push({
+        event: 'begin_checkout',
+        ecommerce: {
+          currency: 'BDT',
+          value: cartTotal,
+          items: cartItems.map(item => ({
+            item_id: item._id || item.slug,
+            item_name: item.title,
+            item_category: item.category,
+            price: item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice),
+            quantity: item.quantity
+          }))
+        }
+      });
+    }
+  }, [cartItems, cartTotal]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 

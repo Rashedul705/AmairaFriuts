@@ -4,7 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
-import LiveCountdown from './LiveCountdown';
+import dynamic from 'next/dynamic';
+
+const LiveCountdown = dynamic(() => import('./LiveCountdown'), { ssr: false });
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();

@@ -625,8 +625,7 @@ export default function UnifiedAdminDashboard() {
     .filter(o => o.order_status === 'delivered')
     .reduce((acc, curr) => acc + curr.totalAmount, 0);
 
-  const lowStockThreshold = 10;
-  const lowStockCount = products.filter(p => !p.inStock || p.pricePerKg < 500).length; // Simulated threshold
+  const lowStockCount = products.filter(p => !p.inStock || (p.price_per_kg || p.pricePerKg || p.basePrice) < 500).length; // Simulated threshold
 
   // Top Selling Products mock calculation
   const topSellingProducts = products.slice(0, 3);
@@ -942,7 +941,7 @@ export default function UnifiedAdminDashboard() {
                         <ul style={{ paddingLeft: '1rem', marginTop: '0.75rem', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                           {topSellingProducts.map(p => (
                             <li key={p._id}>
-                              <strong>{p.title}</strong> - ৳{p.pricePerKg} ({p.category})
+                              <strong>{p.title}</strong> - ৳{p.price_per_kg || p.pricePerKg || p.basePrice} ({p.category})
                             </li>
                           ))}
                         </ul>
@@ -1054,7 +1053,7 @@ export default function UnifiedAdminDashboard() {
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Slug: {prod.slug}</div>
                               </td>
                               <td>{prod.category}</td>
-                              <td><strong>৳ {prod.pricePerKg}</strong></td>
+                              <td><strong>৳ {prod.price_per_kg || prod.pricePerKg || prod.basePrice}</strong></td>
                               <td>
                                 <span className={`ticket-badge ${prod.inStock ? 'resolved' : 'open'}`} style={{ backgroundColor: prod.inStock ? undefined : '#f8d7da', color: prod.inStock ? undefined : '#721c24' }}>
                                   {prod.inStock ? 'In Stock' : 'Out of Stock'}

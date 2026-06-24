@@ -102,14 +102,14 @@ router.post('/', protect, async (req, res) => {
       title,
       slug,
       description,
-      pricePerKg,
+      price_per_kg: pricePerKg,
       price_validity_days: daysLeftForPrice,
       price_updated_at: Date.now(),
       images: images || [],
       category,
       variants: variants || [],
       inStock: inStock !== undefined ? inStock : true,
-      stockQuantity: stockQuantity !== undefined ? stockQuantity : 0,
+      stock_kg: stockQuantity !== undefined ? stockQuantity : 0,
       freeDelivery: freeDelivery !== undefined ? freeDelivery : false,
     });
 
@@ -146,7 +146,7 @@ router.put('/:id', protect, async (req, res) => {
       }
     }
     product.description = description !== undefined ? description : product.description;
-    product.pricePerKg = pricePerKg !== undefined ? pricePerKg : product.pricePerKg;
+    product.price_per_kg = pricePerKg !== undefined ? pricePerKg : product.price_per_kg;
     if (daysLeftForPrice !== undefined && daysLeftForPrice !== product.daysLeftForPrice) {
       product.price_validity_days = daysLeftForPrice;
       product.price_updated_at = Date.now();
@@ -155,7 +155,7 @@ router.put('/:id', protect, async (req, res) => {
     product.category = category || product.category;
     product.variants = variants || product.variants;
     product.inStock = inStock !== undefined ? inStock : product.inStock;
-    product.stockQuantity = stockQuantity !== undefined ? stockQuantity : product.stockQuantity;
+    product.stock_kg = stockQuantity !== undefined ? stockQuantity : product.stock_kg;
     product.freeDelivery = freeDelivery !== undefined ? freeDelivery : product.freeDelivery;
 
     const updatedProduct = await product.save();

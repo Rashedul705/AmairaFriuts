@@ -3,6 +3,8 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const AbandonedCart = require('../models/AbandonedCart');
+const SuccessfulCustomer = require('../models/SuccessfulCustomer');
+const AbandonedCustomer = require('../models/AbandonedCustomer');
 const { protect } = require('../middleware/auth');
 
 // Helper to generate unique human-readable tracking ID
@@ -123,6 +125,24 @@ router.post('/', async (req, res) => {
       await AbandonedCart.findByIdAndUpdate(abandonedCartId, { status: 'Recovered' });
     }
 
+    // Save/Update in SuccessfulCustomer section
+    try {
+      await SuccessfulCustomer.findOneAndUpdate(
+        { phone },
+        { 
+          $set: { name: customerName, district, shippingAddress, last_order_at: new Date() },
+          $inc: { total_orders: 1, total_spent: totalAmount },
+          $setOnInsert: { first_order_at: new Date() }
+        },
+        { upsert: true, new: true }
+      );
+
+      // Ensure they are removed from AbandonedCustomer since they are now successful
+      await AbandonedCustomer.findOneAndDelete({ phone });
+    } catch (err) {
+      console.error('Error saving SuccessfulCustomer:', err);
+    }
+
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -227,6 +247,23 @@ router.post('/abandoned-carts', async (req, res) => {
       cart = await AbandonedCart.create({
         customerName, phone, district, shippingAddress, items, cartTotal, shippingFee
       });
+    }
+
+    // Save/Update in AbandonedCustomer section (only if they are NOT a successful customer)
+    try {
+      const existingSuccess = await SuccessfulCustomer.findOne({ phone });
+      if (!existingSuccess) {
+        await AbandonedCustomer.findOneAndUpdate(
+          { phone },
+          { 
+            $set: { name: customerName, district, shippingAddress, last_abandoned_at: Date.now() },
+            $inc: { abandoned_cart_count: 1 }
+          },
+          { upsert: true, new: true }
+        );
+      }
+    } catch (err) {
+      console.error('Error saving AbandonedCustomer:', err);
     }
     
     res.status(201).json({ abandonedCartId: cart._id });

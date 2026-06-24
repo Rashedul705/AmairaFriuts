@@ -20,6 +20,7 @@ export default function ProductDetails() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -93,6 +94,9 @@ export default function ProductDetails() {
   const subtotal = unitPrice * quantity;
 
   const handleAddToCart = () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant); 
     }
@@ -115,9 +119,13 @@ export default function ProductDetails() {
     });
 
     alert(`${quantity}x ${product.title} added to cart!`);
+    setTimeout(() => setIsProcessing(false), 500);
   };
 
   const handleBuyNow = () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant);
     }
@@ -292,18 +300,20 @@ export default function ProductDetails() {
                 ) : (
                   <>
                     <button 
+                      disabled={isProcessing}
                       onClick={handleAddToCart}
                       className="btn btn-outline" 
-                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', opacity: isProcessing ? 0.7 : 1 }}
                     >
-                      Add to Cart
+                      {isProcessing ? 'Adding...' : 'Add to Cart'}
                     </button>
                     <button 
+                      disabled={isProcessing}
                       onClick={handleBuyNow}
                       className="btn btn-primary" 
-                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                      style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', opacity: isProcessing ? 0.7 : 1 }}
                     >
-                      Buy Now
+                      {isProcessing ? 'Processing...' : 'Buy Now'}
                     </button>
                   </>
                 )}

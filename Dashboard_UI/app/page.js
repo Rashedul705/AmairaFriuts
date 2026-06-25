@@ -8,7 +8,7 @@ export default async function Home() {
   
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-    const res = await fetch(`${apiUrl}/api/products`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}/api/products`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const data = await res.json();
       if (data && data.length > 0) {
@@ -23,7 +23,15 @@ export default async function Home() {
     <div>
       {/* Immersive Hero Banner */}
       <section className="hero">
-        <div className="container">
+        <Image 
+          src="/assets/hero-orchard.jpg" 
+          alt="Amaira Fruits Orchard" 
+          fill 
+          priority 
+          style={{ objectFit: 'cover', zIndex: -2 }} 
+        />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(to bottom, rgba(19,93,39,0.4) 0%, rgba(19,93,39,0.65) 50%, rgba(19,93,39,0.9) 100%)', zIndex: -1 }}></div>
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <div className="hero-content">
             <span className="badge badge-accent" style={{ marginBottom: '1rem', display: 'inline-block', fontWeight: 'bold' }}>
               🍒 Season 2026 · Pre-order Open

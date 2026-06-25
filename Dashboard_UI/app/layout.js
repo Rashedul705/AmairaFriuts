@@ -6,6 +6,8 @@ import N8nChat from "@/components/N8nChat";
 import { CartProvider } from "@/context/CartContext";
 import { GoogleTagManager } from '@next/third-parties/google';
 import GTMDebugPanel from "@/components/GTMDebugPanel";
+import ProgressBarProvider from "@/components/ProgressBarProvider";
+
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
@@ -40,8 +42,9 @@ export default function RootLayout({ children }) {
         {process.env.NEXT_PUBLIC_GTM_ID && (
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         )}
-        <CartProvider>
-          <Navbar />
+        <ProgressBarProvider>
+          <CartProvider>
+            <Navbar />
           <main style={{ flex: 1 }}>
             {children}
           </main>
@@ -59,6 +62,7 @@ export default function RootLayout({ children }) {
           </a>
           <GTMDebugPanel />
         </CartProvider>
+        </ProgressBarProvider>
       </body>
     </html>
   );

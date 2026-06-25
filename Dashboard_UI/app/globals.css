@@ -317,6 +317,7 @@ h3 { font-size: 1.6rem; }
   padding: 7rem 0 9rem 0;
   position: relative;
   overflow: hidden;
+  z-index: 0;
 }
 
 .hero::after {

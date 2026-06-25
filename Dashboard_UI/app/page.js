@@ -8,7 +8,7 @@ export default async function Home() {
   
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-    const res = await fetch(`${apiUrl}/api/products`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${apiUrl}/api/products`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data && data.length > 0) {

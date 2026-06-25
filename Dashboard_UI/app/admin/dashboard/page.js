@@ -615,14 +615,14 @@ export default function UnifiedAdminDashboard() {
 
   // Dashboard Stats Calculations
   const totalOrdersCount = orders.length;
-  const pendingOrdersCount = orders.filter(o => o.order_status === 'Pending').length;
-  const confirmedOrdersCount = orders.filter(o => o.order_status === 'Confirmed').length;
-  const shippedOrdersCount = orders.filter(o => o.order_status === 'Shipped').length;
-  const deliveredOrdersCount = orders.filter(o => o.order_status === 'delivered').length;
-  const cancelledOrdersCount = orders.filter(o => o.order_status === 'cancelled').length;
+  const pendingOrdersCount = orders.filter(o => o.order_status?.toLowerCase() === 'pending').length;
+  const confirmedOrdersCount = orders.filter(o => o.order_status?.toLowerCase() === 'confirmed').length;
+  const shippedOrdersCount = orders.filter(o => o.order_status?.toLowerCase() === 'shipped').length;
+  const deliveredOrdersCount = orders.filter(o => o.order_status?.toLowerCase() === 'delivered').length;
+  const cancelledOrdersCount = orders.filter(o => o.order_status?.toLowerCase() === 'cancelled').length;
 
   const totalRevenue = orders
-    .filter(o => o.order_status === 'delivered')
+    .filter(o => o.order_status?.toLowerCase() === 'delivered')
     .reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
 
   const lowStockCount = products.filter(p => !p.inStock || (p.price_per_kg || p.pricePerKg || p.basePrice) < 500).length; // Simulated threshold
@@ -630,16 +630,36 @@ export default function UnifiedAdminDashboard() {
   // Top Selling Products mock calculation
   const topSellingProducts = products.slice(0, 3);
   
-  // Daily Sales Trend values for Graph: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
-  const salesGraphData = [
-    { day: 'Sun', sales: 12400 },
-    { day: 'Mon', sales: 15600 },
-    { day: 'Tue', sales: 9800 },
-    { day: 'Wed', sales: 21000 },
-    { day: 'Thu', sales: 18500 },
-    { day: 'Fri', sales: 24500 },
-    { day: 'Sat', sales: totalRevenue > 0 ? totalRevenue : 32000 }
-  ];
+  // Calculate real daily sales trend and order counts for the last 7 days exactly
+  const salesGraphData = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dayName = dayNames[d.getDay()];
+    
+    let dailySales = 0;
+    let dailyCount = 0;
+    
+    orders.forEach(o => {
+      if (o.order_status?.toLowerCase() === 'delivered') {
+        const dateString = o.created_at || o.createdAt;
+        if (dateString) {
+          const od = new Date(dateString);
+          if (od.getDate() === d.getDate() && od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear()) {
+            dailySales += (parseFloat(o.total) || 0);
+            dailyCount += 1;
+          }
+        }
+      }
+    });
+    
+    salesGraphData.push({ day: dayName, sales: dailySales, count: dailyCount });
+  }
 
   const maxGraphVal = Math.max(...salesGraphData.map(d => d.sales));
 
@@ -912,11 +932,15 @@ export default function UnifiedAdminDashboard() {
                         backgroundColor: '#fafafa',
                         position: 'relative'
                       }}>
-                        {salesGraphData.map(d => {
+                        {salesGraphData.map((d, index) => {
                           const percent = maxGraphVal > 0 ? (d.sales / maxGraphVal) * 80 : 50;
                           return (
-                            <div key={d.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                              <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--primary)' }}>৳{d.sales}</div>
+                            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                              <div style={{ fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '0.25rem', color: 'var(--primary)', textAlign: 'center', lineHeight: '1.2' }}>
+                                ৳{d.sales}
+                                <br/>
+                                <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>({d.count} {d.count === 1 ? 'order' : 'orders'})</span>
+                              </div>
                               <div style={{
                                 width: '28px',
                                 height: `${percent}%`,

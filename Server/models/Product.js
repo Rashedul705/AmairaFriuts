@@ -39,8 +39,25 @@ productSchema.virtual('price_expiry_date').get(function() {
   return new Date(expiry);
 });
 
-productSchema.set('toJSON', { virtuals: true });
-productSchema.set('toObject', { virtuals: true });
+productSchema.set('toJSON', { 
+  virtuals: true,
+  transform: function(doc, ret) {
+    if (ret.price_validity_days != null && ret.daysLeftForPrice === 0) {
+      ret.inStock = false;
+    }
+    return ret;
+  }
+});
+
+productSchema.set('toObject', { 
+  virtuals: true,
+  transform: function(doc, ret) {
+    if (ret.price_validity_days != null && ret.daysLeftForPrice === 0) {
+      ret.inStock = false;
+    }
+    return ret;
+  }
+});
 
 module.exports = mongoose.model('Product', productSchema);
 

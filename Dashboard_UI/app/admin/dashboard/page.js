@@ -623,7 +623,7 @@ export default function UnifiedAdminDashboard() {
 
   const totalRevenue = orders
     .filter(o => o.order_status === 'delivered')
-    .reduce((acc, curr) => acc + curr.totalAmount, 0);
+    .reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
 
   const lowStockCount = products.filter(p => !p.inStock || (p.price_per_kg || p.pricePerKg || p.basePrice) < 500).length; // Simulated threshold
 

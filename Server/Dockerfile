@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -11,9 +11,10 @@ COPY . .
 
 # Set environment to production
 ENV NODE_ENV production
+ENV PORT 5001
 
 # Expose backend port
-EXPOSE 8000
+EXPOSE 5001
 
 # Start server
 CMD ["node", "index.js"]

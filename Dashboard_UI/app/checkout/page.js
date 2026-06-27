@@ -69,7 +69,7 @@ export default function CheckoutPage() {
           items: cartItems.map(item => ({
             item_id: item._id || item.slug,
             item_name: item.title,
-            item_category: item.category,
+            category: item.category,
             price: item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice),
             quantity: item.quantity
           }))

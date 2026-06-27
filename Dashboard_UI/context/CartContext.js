@@ -35,6 +35,28 @@ export function CartProvider({ children }) {
       if (!variantToAdd && product.variants && product.variants.length > 0) {
         variantToAdd = product.variants[0];
       }
+      
+      const priceToUse = variantToAdd ? variantToAdd.price : (product.pricePerKg || product.price_per_kg || product.basePrice);
+
+      // GTM add_to_cart event
+      if (typeof window !== 'undefined') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+          event: 'add_to_cart',
+          ecommerce: {
+            value: priceToUse,
+            currency: 'BDT',
+            items: [{
+              item_id: product._id,
+              item_name: product.title,
+              category: product.category,
+              price: priceToUse,
+              quantity: 1
+            }]
+          }
+        });
+      }
 
       // We consider an item "same" if both product ID and variant label match
       const existingItemIndex = prevItems.findIndex(

@@ -46,12 +46,12 @@ export default function ProductDetails() {
             window.dataLayer.push({
               event: 'view_item',
               ecommerce: {
-                currency: 'BDT',
                 value: itemPrice,
+                currency: 'BDT',
                 items: [{
                   item_id: data._id,
                   item_name: data.title,
-                  item_category: data.category,
+                  category: data.category,
                   price: itemPrice,
                   quantity: 1
                 }]

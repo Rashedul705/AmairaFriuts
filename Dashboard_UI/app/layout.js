@@ -8,6 +8,7 @@ import { GoogleTagManager } from '@next/third-parties/google';
 import GTMDebugPanel from "@/components/GTMDebugPanel";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import Script from 'next/script';
+import GTMPageView from "@/components/GTMPageView";
 
 const fraunces = Fraunces({
   variable: "--font-display",
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
         <noscript>
           <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W78QPBC3" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe>
         </noscript>
+        <GTMPageView />
         <ProgressBarProvider>
           <CartProvider>
             <Navbar />

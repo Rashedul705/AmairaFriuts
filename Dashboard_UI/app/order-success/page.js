@@ -34,21 +34,42 @@ function OrderSuccessContent() {
           
           if (!sessionStorage.getItem(storageKey)) {
             sessionStorage.setItem(storageKey, '1');
+            
+            const customerName = orderData.customer_snapshot?.name || '';
+            const nameParts = customerName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            const phone = orderData.customer_snapshot?.phone || '';
+            const address = orderData.customer_snapshot?.address || '';
+
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push({
               event: 'purchase',
               ecommerce: {
                 transaction_id: transactionId,
-                currency: 'BDT',
                 value: orderData.total,
+                currency: 'BDT',
                 items: (orderData.items || []).map(item => ({
                   item_id: item.product_id || item._id,
                   item_name: item.product_name || item.name,
-                  item_category: item.variant_name || 'Uncategorized',
+                  category: item.variant_name || 'Uncategorized',
                   price: item.price_per_kg || item.price,
                   quantity: item.quantity_kg || item.quantity
                 }))
+              },
+              orderData: {
+                customer: {
+                  billing: {
+                    email: "",
+                    phone: phone,
+                    first_name: firstName,
+                    last_name: lastName,
+                    country: "Bangladesh",
+                    city: address,
+                    postal_code: ""
+                  }
+                }
               }
             });
           }

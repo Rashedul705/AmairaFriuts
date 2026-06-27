@@ -39,9 +39,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${fraunces.variable} ${hindSiliguri.variable}`}>
       <body>
-        {process.env.NEXT_PUBLIC_GTM_ID && (
-          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
-        )}
+        {/* Google Tag Manager (Official Next.js Implementation) */}
+        <GoogleTagManager gtmId="GTM-W78QPBC3" />
         <ProgressBarProvider>
           <CartProvider>
             <Navbar />

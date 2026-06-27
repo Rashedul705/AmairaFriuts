@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import { GoogleTagManager } from '@next/third-parties/google';
 import GTMDebugPanel from "@/components/GTMDebugPanel";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
+import Script from 'next/script';
 
 const fraunces = Fraunces({
   variable: "--font-display",
@@ -38,9 +39,21 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${fraunces.variable} ${hindSiliguri.variable}`}>
+      <head>
+        <Script id="gtm-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-W78QPBC3');
+          `
+        }} />
+      </head>
       <body>
-        {/* Google Tag Manager (Official Next.js Implementation) */}
-        <GoogleTagManager gtmId="GTM-W78QPBC3" />
+        <noscript>
+          <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W78QPBC3" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe>
+        </noscript>
         <ProgressBarProvider>
           <CartProvider>
             <Navbar />

@@ -49,7 +49,7 @@ export default function ProductDetails() {
                 value: itemPrice,
                 currency: 'BDT',
                 items: [{
-                  item_id: data._id,
+                  item_id: data._id?._id || data._id,
                   item_name: data.title,
                   category: data.category,
                   price: itemPrice,

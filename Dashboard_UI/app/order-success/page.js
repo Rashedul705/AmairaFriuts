@@ -51,7 +51,7 @@ function OrderSuccessContent() {
                 value: orderData.total,
                 currency: 'BDT',
                 items: (orderData.items || []).map(item => ({
-                  item_id: item.product_id || item._id,
+                  item_id: item.product_id?._id || item.product_id || item._id?._id || item._id,
                   item_name: item.product_name || item.name,
                   category: item.variant_name || 'Uncategorized',
                   price: item.price_per_kg || item.price,

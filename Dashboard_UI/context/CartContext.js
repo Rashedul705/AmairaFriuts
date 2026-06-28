@@ -48,7 +48,7 @@ export function CartProvider({ children }) {
             value: priceToUse,
             currency: 'BDT',
             items: [{
-              item_id: product._id,
+              item_id: product._id?._id || product._id,
               item_name: product.title,
               category: product.category,
               price: priceToUse,

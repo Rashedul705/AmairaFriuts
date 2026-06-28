@@ -67,7 +67,7 @@ export default function CheckoutPage() {
           currency: 'BDT',
           value: cartTotal,
           items: cartItems.map(item => ({
-            item_id: item._id || item.slug,
+            item_id: item._id?._id || item._id || item.slug,
             item_name: item.title,
             category: item.category,
             price: item.selectedVariant ? item.selectedVariant.price : (item.pricePerKg || item.price_per_kg || item.basePrice),
